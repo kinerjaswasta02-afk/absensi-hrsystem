@@ -254,4 +254,12 @@ save = function(){
 loadOwnerFinanceFromFirestore().then(()=>{
   watchOwnerFinanceFirestore();
 });
+  // Sinkronisasi role user Firebase
+function syncCurrentUserRoleToFirebase(uid, role){
+  if(!uid || !role || !window.OA_FIREBASE_CONNECTED) return Promise.resolve();
+
+  return firestoreDb.collection('users').doc(uid).set({
+    role: role
+  }, { merge: true });
+}
 </script></body></html>
