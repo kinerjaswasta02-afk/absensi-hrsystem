@@ -5,7 +5,7 @@
 <label>Akses</label><select id="loginRole"><option value="OWNER">Owner</option><option value="ADMIN">Admin</option></select>
 <label>PIN</label><input id="loginPin" type="password" inputmode="numeric" placeholder="PIN">
 <button class="btn" style="width:100%" onclick="doLogin()">Masuk</button></div></div>
-<header><div class="brand">ocean <span>furniture</span></div><div><span id="roleBadge" class="ver"></span> <span class="ver">ATTENDANCE v6.4</span></div></header>
+<header><div class="brand">ocean <span>furniture</span></div><div><span id="roleBadge" class="ver"></span> <span class="ver">ATTENDANCE v6.5</span></div></header>
 <main>
 <section class="hero"><h2>Absensi Karyawan</h2><div id="clock"></div><div class="stats"><div class="stat"><b id="sHadir">0</b><small>Hadir</small></div><div class="stat"><b id="sLate">0</b><small>Terlambat</small></div><div class="stat"><b id="sBelum">3</b><small>Belum masuk</small></div></div></section>
 <section class="card"><div class="actions"><button class="btn" onclick="startScan()">▣ Scan QR / Barcode</button><button class="btn dark" onclick="startFace()">☺ Scan Wajah</button></div><button class="btn soft" style="width:100%;margin-top:9px" onclick="openCheckout()">↩ Absen Pulang Opsional</button><p class="note"><b>Aturan:</b> QR/barcode adalah metode utama. Scan wajah bersifat opsional. Keduanya hanya mencatat MASUK satu kali per hari. Pulang memakai menu khusus dan bersifat opsional.</p><div id="secureInfo"></div></section>
@@ -16,7 +16,7 @@
 </div></section>
 <section class="card"><h3>Riwayat Hari Ini</h3><div id="logs"><span class="note">Belum ada absensi.</span></div></section>
 <section class="card"><h3>Izin / Sakit / Cuti</h3><button class="btn soft" onclick="openStatus()">+ Atur Status</button></section>
-<section class="card" id="reportSection"><h3>Laporan Kehadiran</h3><div class="tabs"><button class="btn soft" onclick="setReport('day')">Harian</button><button class="btn soft" onclick="setReport('week')">Mingguan</button><button class="btn soft" onclick="setReport('month')">Bulanan</button></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px"><div><label>Dari</label><input type="date" id="dateFrom"></div><div><label>Sampai</label><input type="date" id="dateTo"></div></div><button class="btn" style="width:100%" onclick="customReport()">Tampilkan Periode</button><div id="reportSummary" class="stats" style="margin-top:12px"></div><div id="reportBox" class="note" style="margin-top:10px">Pilih periode laporan.</div></section>
+<section class="card" id="reportSection"><h3>Laporan Kehadiran</h3><div class="tabs"><button class="btn soft" onclick="setReport('day')">Harian</button><button class="btn soft" onclick="setReport('week')">Mingguan</button><button class="btn soft" onclick="setReport('month')">Bulanan</button></div><label style="display:block;margin-top:10px">Filter Karyawan</label><select id="reportEmployeeFilter" onchange="refreshCurrentReport()"><option value="ALL">Semua Karyawan</option></select><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px"><div><label>Dari</label><input type="date" id="dateFrom"></div><div><label>Sampai</label><input type="date" id="dateTo"></div></div><button class="btn" style="width:100%" onclick="customReport()">Tampilkan Periode</button><div id="reportSummary" class="stats" style="margin-top:12px"></div><div id="reportBox" class="note" style="margin-top:10px">Pilih periode laporan.</div></section>
 <section class="card ownerOnly" id="payrollSection"><h3>Gaji • Kasbon • Pinjaman <span class="tag">OWNER ONLY</span></h3>
 <p class="note">Pilih periode. Setelah pembayaran dikonfirmasi, periode karyawan tersebut dikunci agar tidak dibayar dua kali.</p>
 <div class="tabs"><button class="btn soft" onclick="salaryPeriod('day')">Harian</button><button class="btn soft" onclick="salaryPeriod('week')">Mingguan</button><button class="btn soft" onclick="salaryPeriod('month')">Bulanan</button></div>
@@ -102,7 +102,7 @@ function resetDemoPin(){localStorage.setItem('oa4_pin','1234');pinInput.value=''
 function goTo(id){document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'})}
 function goReport(){report('today');goTo('reportSection')}
 function changePin(){let x=newPin.value.trim();if(x.length<4)return alert('PIN minimal 4 digit.');localStorage.setItem('oa4_pin',x);newPin.value='';alert('PIN berhasil diubah.')}
-function render(){emps.innerHTML=employees.map(e=>`<div class="emp"><div class="avatar">${e.photo?`<img src="${e.photo}">`:e.name.slice(0,2).toUpperCase()}</div><div class="grow"><b>${e.name}</b><br><small>${e.job}</small><br><span class="qr">${e.id}</span></div><div style="display:flex;gap:5px;flex-wrap:wrap"><button class="btn soft" onclick="showQR('${e.id}')">QR</button><button class="btn soft" onclick="editEmployee('${e.id}')">Edit</button><button class="btn red" onclick="deleteEmployee('${e.id}')">Hapus</button></div></div>`).join('');renderLogs();stats();security();renderPayroll()}
+function render(){emps.innerHTML=employees.map(e=>`<div class="emp"><div class="avatar">${e.photo?`<img src="${e.photo}">`:e.name.slice(0,2).toUpperCase()}</div><div class="grow"><b>${e.name}</b><br><small>${e.job}</small><br><span class="qr">${e.id}</span></div><div style="display:flex;gap:5px;flex-wrap:wrap"><button class="btn soft" onclick="showQR('${e.id}')">QR</button><button class="btn soft" onclick="editEmployee('${e.id}')">Edit</button><button class="btn red" onclick="deleteEmployee('${e.id}')">Hapus</button></div></div>`).join('');renderLogs();stats();security();renderPayroll();renderReportEmployeeFilter()}
 function security(){let ok=location.protocol==='https:'||location.hostname==='localhost';secureInfo.innerHTML=ok?'<div class="secure">✓ Mode kamera aman terdeteksi. Berikan izin kamera saat Chrome meminta.</div>':'<div class="warn"><b>Kamera mungkin diblokir.</b><br>File ini sedang tidak dibuka melalui HTTPS/localhost. Untuk scanner kamera yang benar-benar berfungsi di HP, upload/host aplikasi ini pada alamat HTTPS.</div>'}
 function ownerCheck(){let x=prompt('Masukkan PIN Owner/Admin');if(x!==pin()){alert('PIN salah.');return false}return true}
 function editEmployee(id){if(!ownerCheck())return;let e=employees.find(x=>x.id===id);if(!e)return;let n=prompt('Nama karyawan',e.name);if(n===null)return;n=n.trim();if(!n)return alert('Nama tidak boleh kosong.');let j=prompt('Jabatan',e.job);if(j===null)return;e.name=n;e.job=j.trim()||'Karyawan';logs.forEach(x=>{if(x.id===id)x.name=e.name});save();render()}
@@ -157,7 +157,9 @@ function openStatus(){let p=prompt('PIN Owner/Admin');if(p!==pin())return alert(
 function saveManualStatus(){let e=employees.find(x=>x.id===statusEmployee.value),day=statusDate.value,val=statusValue.value;if(!e||!day)return;logs=logs.filter(x=>!(x.id===e.id&&x.day===day&&['IZIN','SAKIT','CUTI'].includes(x.type)));logs.unshift({id:e.id,name:e.name,type:val,time:'—',day,late:false});save();render();statusDlg.close()}
 function setReport(k){let n=new Date(),a,b;if(k==='day')a=b=ymd(n);else if(k==='week'){let x=new Date(n);x.setDate(n.getDate()-6);a=ymd(x);b=ymd(n)}else{a=ymd(new Date(n.getFullYear(),n.getMonth(),1));b=ymd(new Date(n.getFullYear(),n.getMonth()+1,0))}dateFrom.value=a;dateTo.value=b;buildReport(a,b)}
 function customReport(){if(!dateFrom.value||!dateTo.value)return alert('Pilih tanggal.');if(dateFrom.value>dateTo.value)return alert('Periode tidak valid.');buildReport(dateFrom.value,dateTo.value)}
-function buildReport(a,b){let rows=[],t={HADIR:0,TERLAMBAT:0,TIDAK:0,IZIN:0,SAKIT:0,CUTI:0};for(let d=parseYmd(a),z=parseYmd(b);d<=z;d.setDate(d.getDate()+1)){let day=ymd(d);employees.forEach(e=>{let m=logs.find(x=>x.id===e.id&&x.day===day&&x.type==='MASUK'),p=logs.find(x=>x.id===e.id&&x.day===day&&x.type==='PULANG'),sp=logs.find(x=>x.id===e.id&&x.day===day&&['IZIN','SAKIT','CUTI'].includes(x.type)),st;if(m){st=m.late?'TERLAMBAT':'HADIR';t[st]++}else if(sp){st=sp.type;t[st]++}else{st='TIDAK HADIR';t.TIDAK++}rows.push(`<div class="emp"><div class="grow"><b>${day} • ${e.name}</b><br><small>${st} • Masuk ${m?m.time:'—'} • Pulang ${p?p.time:'—'}</small></div></div>`)})}reportSummary.innerHTML=`<div class="stat"><b>${t.HADIR}</b><small>Hadir</small></div><div class="stat"><b>${t.TERLAMBAT}</b><small>Terlambat</small></div><div class="stat"><b>${t.TIDAK}</b><small>Tidak Hadir</small></div><div class="stat"><b>${t.IZIN}</b><small>Izin</small></div><div class="stat"><b>${t.SAKIT}</b><small>Sakit</small></div><div class="stat"><b>${t.CUTI}</b><small>Cuti</small></div>`;reportBox.innerHTML=rows.join('')}
+function renderReportEmployeeFilter(){let f=document.getElementById('reportEmployeeFilter');if(!f)return;let keep=f.value||'ALL';f.innerHTML='<option value="ALL">Semua Karyawan</option>'+employees.map(e=>`<option value="${e.id}">${e.name}</option>`).join('');if([...f.options].some(o=>o.value===keep))f.value=keep}
+function refreshCurrentReport(){if(dateFrom.value&&dateTo.value)buildReport(dateFrom.value,dateTo.value)}
+function buildReport(a,b){let rows=[],t={HADIR:0,TERLAMBAT:0,TIDAK:0,IZIN:0,SAKIT:0,CUTI:0},fid=document.getElementById('reportEmployeeFilter')?.value||'ALL',selected=employees.filter(e=>fid==='ALL'||e.id===fid);for(let d=parseYmd(a),z=parseYmd(b);d<=z;d.setDate(d.getDate()+1)){let day=ymd(d);selected.forEach(e=>{let m=logs.find(x=>x.id===e.id&&x.day===day&&x.type==='MASUK'),p=logs.find(x=>x.id===e.id&&x.day===day&&x.type==='PULANG'),sp=logs.find(x=>x.id===e.id&&x.day===day&&['IZIN','SAKIT','CUTI'].includes(x.type)),st;if(m){st=m.late?'TERLAMBAT':'HADIR';t[st]++}else if(sp){st=sp.type;t[st]++}else{st='TIDAK HADIR';t.TIDAK++}rows.push(`<div class="emp"><div class="grow"><b>${day} • ${e.name}</b><br><small>${st} • Masuk ${m?m.time:'—'} • Pulang ${p?p.time:'—'}</small></div></div>`)})}reportSummary.innerHTML=`<div class="stat"><b>${t.HADIR}</b><small>Hadir</small></div><div class="stat"><b>${t.TERLAMBAT}</b><small>Terlambat</small></div><div class="stat"><b>${t.TIDAK}</b><small>Tidak Hadir</small></div><div class="stat"><b>${t.IZIN}</b><small>Izin</small></div><div class="stat"><b>${t.SAKIT}</b><small>Sakit</small></div><div class="stat"><b>${t.CUTI}</b><small>Cuti</small></div>`;reportBox.innerHTML=rows.join('')||'Belum ada data.'}
 async function stopScan(){try{if(scanner)await scanner.stop()}catch(e){}scanner=null;scanDlg.close()}
 function faceInfo(){alert(faceToggle.checked?'Verifikasi wajah ON. v4 menyiapkan alurnya; pengenalan wajah nyata belum diaktifkan.':'Verifikasi wajah OFF. Aktifkan melalui Pengaturan Owner/Admin.')}
 render();testFirebaseConnection().then(ok=>{if(ok){loadEmployeesFromFirestore();loadLogsFromFirestore();loadSettingsFromFirestore();watchFirestore();watchSettingsFirestore()}});setTimeout(()=>{let n=ymd(new Date());if(document.getElementById('salaryFrom')){salaryFrom.value=n;salaryTo.value=n}},0);
@@ -169,7 +171,7 @@ async function syncOwnerFinanceToFirestore(){
   if(!window.OA_FIREBASE_CONNECTED || ownerFinanceApplyingRemote) return;
   try{
     await firestoreDb.collection('ownerData').doc('payrollFinance').set({
-      payroll: Array.isArray(payroll) ? payroll : [],
+      payroll: (payroll && typeof payroll==='object' && !Array.isArray(payroll)) ? payroll : {},
       finance: Array.isArray(finance) ? finance : [],
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     }, {merge:true});
@@ -189,14 +191,14 @@ async function loadOwnerFinanceFromFirestore(){
       const d=snap.data()||{};
       ownerFinanceApplyingRemote=true;
 
-      if(Array.isArray(d.payroll)){
+      if(d.payroll && typeof d.payroll==='object' && !Array.isArray(d.payroll)){
         payroll=d.payroll;
-        localStorage.setItem('oa4_payroll',JSON.stringify(payroll));
+        localStorage.setItem('oa6_payroll',JSON.stringify(payroll));
       }
 
       if(Array.isArray(d.finance)){
         finance=d.finance;
-        localStorage.setItem('oa4_finance',JSON.stringify(finance));
+        localStorage.setItem('oa6_finance',JSON.stringify(finance));
       }
 
       ownerFinanceApplyingRemote=false;
@@ -223,14 +225,14 @@ function watchOwnerFinanceFirestore(){
     const d=snap.data()||{};
     ownerFinanceApplyingRemote=true;
 
-    if(Array.isArray(d.payroll)){
+    if(d.payroll && typeof d.payroll==='object' && !Array.isArray(d.payroll)){
       payroll=d.payroll;
-      localStorage.setItem('oa4_payroll',JSON.stringify(payroll));
+      localStorage.setItem('oa6_payroll',JSON.stringify(payroll));
     }
 
     if(Array.isArray(d.finance)){
       finance=d.finance;
-      localStorage.setItem('oa4_finance',JSON.stringify(finance));
+      localStorage.setItem('oa6_finance',JSON.stringify(finance));
     }
 
     ownerFinanceApplyingRemote=false;
