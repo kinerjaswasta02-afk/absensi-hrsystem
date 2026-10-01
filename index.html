@@ -161,4 +161,95 @@ function buildReport(a,b){let rows=[],t={HADIR:0,TERLAMBAT:0,TIDAK:0,IZIN:0,SAKI
 async function stopScan(){try{if(scanner)await scanner.stop()}catch(e){}scanner=null;scanDlg.close()}
 function faceInfo(){alert(faceToggle.checked?'Verifikasi wajah ON. v4 menyiapkan alurnya; pengenalan wajah nyata belum diaktifkan.':'Verifikasi wajah OFF. Aktifkan melalui Pengaturan Owner/Admin.')}
 render();testFirebaseConnection().then(ok=>{if(ok){loadEmployeesFromFirestore();loadLogsFromFirestore();loadSettingsFromFirestore();watchFirestore();watchSettingsFirestore()}});setTimeout(()=>{let n=ymd(new Date());if(document.getElementById('salaryFrom')){salaryFrom.value=n;salaryTo.value=n}},0);
+// ===== FIREBASE SYNC: GAJI + KASBON + PINJAMAN + PEMBAYARAN =====
+let ownerFinanceSyncReady = false;
+let ownerFinanceApplyingRemote = false;
+
+async function syncOwnerFinanceToFirestore(){
+  if(!window.OA_FIREBASE_CONNECTED || ownerFinanceApplyingRemote) return;
+  try{
+    await firestoreDb.collection('ownerData').doc('payrollFinance').set({
+      payroll: Array.isArray(payroll) ? payroll : [],
+      finance: Array.isArray(finance) ? finance : [],
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, {merge:true});
+    console.log('Firebase: gaji/finance tersinkron');
+  }catch(err){
+    console.error('Firebase finance sync error:',err);
+  }
+}
+
+async function loadOwnerFinanceFromFirestore(){
+  if(!window.OA_FIREBASE_CONNECTED) return;
+  try{
+    const ref=firestoreDb.collection('ownerData').doc('payrollFinance');
+    const snap=await ref.get();
+
+    if(snap.exists){
+      const d=snap.data()||{};
+      ownerFinanceApplyingRemote=true;
+
+      if(Array.isArray(d.payroll)){
+        payroll=d.payroll;
+        localStorage.setItem('oa4_payroll',JSON.stringify(payroll));
+      }
+
+      if(Array.isArray(d.finance)){
+        finance=d.finance;
+        localStorage.setItem('oa4_finance',JSON.stringify(finance));
+      }
+
+      ownerFinanceApplyingRemote=false;
+      if(typeof renderPayroll==='function') renderPayroll();
+      if(typeof render==='function') render();
+    }else{
+      await syncOwnerFinanceToFirestore();
+    }
+
+    ownerFinanceSyncReady=true;
+  }catch(err){
+    ownerFinanceApplyingRemote=false;
+    console.error('Firebase finance load error:',err);
+  }
+}
+
+function watchOwnerFinanceFirestore(){
+  if(!window.OA_FIREBASE_CONNECTED) return;
+
+  firestoreDb.collection('ownerData').doc('payrollFinance')
+  .onSnapshot(snap=>{
+    if(!snap.exists || !ownerFinanceSyncReady) return;
+
+    const d=snap.data()||{};
+    ownerFinanceApplyingRemote=true;
+
+    if(Array.isArray(d.payroll)){
+      payroll=d.payroll;
+      localStorage.setItem('oa4_payroll',JSON.stringify(payroll));
+    }
+
+    if(Array.isArray(d.finance)){
+      finance=d.finance;
+      localStorage.setItem('oa4_finance',JSON.stringify(finance));
+    }
+
+    ownerFinanceApplyingRemote=false;
+
+    if(typeof renderPayroll==='function') renderPayroll();
+    if(typeof render==='function') render();
+  },err=>console.error('Firebase finance watch error:',err));
+}
+
+// Ikutkan sinkronisasi setiap aplikasi menyimpan perubahan
+const originalSaveOwnerFinance = save;
+save = function(){
+  const result=originalSaveOwnerFinance.apply(this,arguments);
+  if(ownerFinanceSyncReady) syncOwnerFinanceToFirestore();
+  return result;
+};
+
+// Pertama kali buka: ambil data, lalu aktifkan realtime antar-device
+loadOwnerFinanceFromFirestore().then(()=>{
+  watchOwnerFinanceFirestore();
+});
 </script></body></html>
