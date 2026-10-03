@@ -185,7 +185,7 @@ async function sendMfaLoginCode(){
  try{
    const hint=mfaResolver.hints.find(h=>h.factorId===firebase.auth.PhoneMultiFactorGenerator.FACTOR_ID);
    if(!hint)throw Error('Akun ini tidak memiliki faktor SMS.');
-   if(!mfaLoginRecaptcha){mfaLoginRecaptcha=new firebase.auth.RecaptchaVerifier('mfaLoginRecaptcha',{size:'normal'},firebaseAuth);await mfaLoginRecaptcha.render();}
+   if(!mfaLoginRecaptcha){mfaLoginRecaptcha=new firebase.auth.RecaptchaVerifier('mfaLoginRecaptcha',{size:'normal'},firebase.app());await mfaLoginRecaptcha.render();}
    const provider=new firebase.auth.PhoneAuthProvider(firebaseAuth);
    mfaLoginVerificationId=await provider.verifyPhoneNumber({multiFactorHint:hint,session:mfaResolver.session},mfaLoginRecaptcha);
    mfaLoginError.style.color='#167747';mfaLoginError.textContent='Kode SMS telah dikirim.';
@@ -216,7 +216,7 @@ async function sendMfaEnrollment(){
  try{
    const user=firebaseAuth.currentUser;if(!user)throw Error('Silakan login kembali.');
    mfaStage='membuat reCAPTCHA';
-   if(!mfaEnrollRecaptcha){mfaEnrollRecaptcha=new firebase.auth.RecaptchaVerifier('mfaEnrollRecaptcha',{size:'normal'},firebaseAuth);await mfaEnrollRecaptcha.render();}
+   if(!mfaEnrollRecaptcha){mfaEnrollRecaptcha=new firebase.auth.RecaptchaVerifier('mfaEnrollRecaptcha',{size:'normal'},firebase.app());await mfaEnrollRecaptcha.render();}
    mfaStage='mendapatkan sesi MFA';
    const session=await user.multiFactor.getSession();
    mfaStage='verifikasi nomor melalui Firebase';
