@@ -2,16 +2,16 @@
 <script src="https://unpkg.com/html5-qrcode"></script>
 <style>*{box-sizing:border-box}body{margin:0;font-family:system-ui;background:#f4f7fb;color:#172033;padding-bottom:76px}header{background:#fff;padding:15px 17px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 12px #0001;position:sticky;top:0;z-index:4}.brand{font-size:22px;font-weight:900;color:#0865cf}.brand span{color:#df3434;font-size:14px}.ver{font-size:11px;background:#eaf3ff;color:#0865cf;padding:7px 10px;border-radius:20px;font-weight:800}main{max-width:760px;margin:auto;padding:15px}.hero{background:linear-gradient(135deg,#0865cf,#4d94e4);color:#fff;padding:19px;border-radius:19px}.hero h2{margin:0 0 5px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:13px}.stat{background:#fff;color:#172033;padding:12px;border-radius:14px}.stat b{font-size:23px;display:block}.muted,.stat small{color:#6c7480}.card{background:#fff;border-radius:18px;padding:15px;margin-top:13px;box-shadow:0 4px 18px #0000000d}.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.btn{border:0;border-radius:13px;padding:13px 10px;font-weight:800;background:#0865cf;color:#fff;cursor:pointer}.btn.dark{background:#172033}.btn.soft{background:#eaf3ff;color:#0865cf}.btn.red{background:#fff0f0;color:#c92c2c}.emp{display:flex;gap:11px;align-items:center;padding:11px 0;border-bottom:1px solid #edf0f3}.avatar{width:45px;height:45px;border-radius:50%;background:#eaf3ff;color:#0865cf;display:grid;place-items:center;font-weight:900;overflow:hidden}.avatar img{width:100%;height:100%;object-fit:cover}.grow{flex:1}.tag{font-size:11px;padding:5px 8px;border-radius:20px;background:#e9f8ef;color:#148a46;font-weight:700}.late{background:#fff3df;color:#ad6700}.qr{font:11px monospace;color:#7a828d}.secure{background:#eef8f2;color:#167747;border-radius:12px;padding:10px;font-size:12px;margin-top:10px}.warn{background:#fff4e5;color:#945b00;border-radius:12px;padding:10px;font-size:12px;margin-top:10px}nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e7ebf0;display:flex;justify-content:space-around;padding:9px calc(5px + env(safe-area-inset-right)) calc(9px + env(safe-area-inset-bottom));z-index:5}nav button{border:0;background:none;color:#596475;font-size:11px}nav b{display:block;font-size:19px}dialog{border:0;border-radius:18px;width:min(94%,500px);padding:0;box-shadow:0 20px 60px #0005}.modal{padding:18px}input,select{width:100%;padding:12px;border:1px solid #dce1e8;border-radius:11px;margin:5px 0 10px}label{font-size:12px;font-weight:700}.switch{display:flex;justify-content:space-between;align-items:center;padding:10px 0}.note{font-size:12px;color:#6c7480;line-height:1.5}#reader{width:100%;overflow:hidden;border-radius:13px}.result{display:none;padding:12px;background:#eaf8ef;border-radius:11px;margin-top:9px}.tabs{display:flex;gap:7px}.tabs button{flex:1}.hidden{display:none}.paytable{width:100%;border-collapse:collapse;font-size:12px}.paytable th,.paytable td{padding:8px 6px;border-bottom:1px solid #e8edf3;text-align:left;white-space:nowrap}.paytable th{background:#f5f8fc}.tablewrap{overflow:auto;border:1px solid #edf0f4;border-radius:12px;margin-top:10px}.paid{color:#168447;font-weight:800}.unpaid{color:#b26b00;font-weight:800}</style><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script></head><body><div id="loginScreen" style="position:fixed;inset:0;background:#f4f7fb;z-index:99;display:grid;place-items:center;padding:18px">
 <div class="card" style="width:min(430px,100%);margin:0"><div class="brand" style="margin-bottom:12px">ABSENSI <span>SYSTEM</span></div><h2>Login Attendance</h2>
-<label>Email akun Firebase</label><input id="loginEmail" type="email" autocomplete="username" placeholder="email@contoh.com"><label>Password</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Password"><p class="note">Masuk menggunakan akun Firebase Owner/Admin yang telah didaftarkan.</p><p id="loginError" role="alert" style="color:#c92c2c;font-size:12px"></p>
+<label>Email akun Firebase</label><input id="loginEmail" type="email" autocomplete="username" placeholder="email@contoh.com"><label>Password</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Password"><p id="loginError" role="alert" style="color:#c92c2c;font-size:12px"></p>
 <button class="btn" style="width:100%" onclick="doLogin()">Masuk</button></div></div>
-<header><div class="brand">ocean <span>furniture</span></div><div><span id="roleBadge" class="ver"></span> <span class="ver">ATTENDANCE v6.6</span> <button id="logoutButton" class="btn red" style="padding:7px 10px" onclick="logoutApp()">Logout</button></div></header>
+<div id="mfaChallengeScreen" class="hidden" style="position:fixed;inset:0;background:#f4f7fb;z-index:110;place-items:center;padding:18px"><div class="card" style="width:min(430px,100%);margin:0"><div class="brand">ABSENSI <span>SYSTEM</span></div><h2>Verifikasi SMS</h2><p class="note">Masukkan kode yang dikirim ke nomor HP terdaftar.</p><div id="mfaLoginRecaptcha"></div><button id="mfaSendLoginBtn" class="btn soft" style="width:100%" onclick="sendMfaLoginCode()">Kirim kode SMS</button><label>Kode verifikasi</label><input id="mfaLoginCode" inputmode="numeric" autocomplete="one-time-code" placeholder="6 digit"><p id="mfaLoginError" role="alert" style="color:#c92c2c;font-size:12px"></p><button class="btn" style="width:100%" onclick="verifyMfaLogin()">Verifikasi & Masuk</button><button class="btn red" style="width:100%;margin-top:8px" onclick="cancelMfaLogin()">Batal</button></div></div><header><div class="brand">ocean <span>furniture</span></div><div><span id="roleBadge" class="ver"></span> <span class="ver">ATTENDANCE v6.7.2.2</span> <button id="logoutButton" class="btn red" style="padding:7px 10px" onclick="logoutApp()">Logout</button></div></header>
 <main>
 <section class="hero"><h2>Absensi Karyawan</h2><div id="clock"></div><div class="stats"><div class="stat"><b id="sHadir">0</b><small>Hadir</small></div><div class="stat"><b id="sLate">0</b><small>Terlambat</small></div><div class="stat"><b id="sBelum">3</b><small>Belum masuk</small></div></div></section>
 <section class="card"><div class="actions"><button class="btn" onclick="startScan()">▣ Scan QR / Barcode</button><button class="btn dark" onclick="startFace()">☺ Scan Wajah</button></div><button class="btn soft" style="width:100%;margin-top:9px" onclick="openCheckout()">↩ Absen Pulang Opsional</button><p class="note"><b>Aturan:</b> QR/barcode adalah metode utama. Scan wajah bersifat opsional. Keduanya hanya mencatat MASUK satu kali per hari. Pulang memakai menu khusus dan bersifat opsional.</p><div id="secureInfo"></div></section>
 <section class="card" id="employeeSection"><div style="display:flex;justify-content:space-between;align-items:center"><h3>Master Karyawan</h3><button class="btn soft" onclick="openPin('employee')">+ Karyawan</button></div><div id="emps"></div>
 <div class="actions" style="margin-top:12px">
-<button class="btn soft" onclick="resetAttendance()">Reset Data Absensi</button>
-<button class="btn red" onclick="resetDemo()">Hapus Semua Data Demo</button>
+<button class="btn soft" disabled title="Dinonaktifkan demi keamanan data cloud">Reset Data Absensi (nonaktif)</button>
+<button class="btn red" disabled title="Dinonaktifkan demi keamanan data cloud">Hapus Semua Data Demo (nonaktif)</button>
 </div></section>
 <section class="card"><h3>Riwayat Hari Ini</h3><div id="logs"><span class="note">Belum ada absensi.</span></div></section>
 <section class="card"><h3>Izin / Sakit / Cuti</h3><button class="btn soft" onclick="openStatus()">+ Atur Status</button></section>
@@ -30,13 +30,13 @@
 <h4>Riwayat Pembayaran / Locked</h4><div id="salaryHistory" class="note"></div></section><section class="card" id="exportSection"><h3>Export Data</h3>
 <p class="note">Admin dapat export Absensi. Owner dapat export seluruh data termasuk Gaji, Pembayaran Locked, Kasbon, Pinjaman, dan Master Karyawan.</p>
 <div class="actions"><button class="btn soft" onclick="exportAttendanceCSV()">Export Absensi</button><button class="btn ownerOnly" onclick="exportOwnerWorkbook()">Export Semua Data</button></div>
-</section><section class="card" id="settingsSection"><h3>Pengaturan Owner/Admin</h3><button class="btn dark" style="width:100%" onclick="openPin('settings')">🔒 Buka Pengaturan</button><div id="settings" class="hidden"><label>Jam masuk normal</label><input type="time" id="workTime" value="08:00" onchange="saveSettings()"><div class="switch"><div><b>Absen Pulang</b><br><small class="muted">Opsional ON/OFF</small></div><input style="width:auto" type="checkbox" id="checkoutToggle" onchange="saveSettings()"></div><label>Jam pulang normal</label><input type="time" id="checkoutTime" value="17:00" onchange="saveSettings()"><div class="switch"><div><b>Verifikasi wajah setelah QR</b><br><small class="muted">Opsional</small></div><input style="width:auto" type="checkbox" id="faceToggle" onchange="saveSettings()"></div><button class="btn" style="width:100%;margin:8px 0 12px" onclick="saveSettings(true)">💾 Simpan Pengaturan</button><p class="note">Akun dan password dikelola melalui Firebase Authentication.</p></div></section>
+</section><section class="card" id="settingsSection"><h3>Pengaturan Owner/Admin</h3><button class="btn dark" style="width:100%" onclick="openPin('settings')">🔒 Buka Pengaturan</button><div id="settings" class="hidden"><label>Jam masuk normal</label><input type="time" id="workTime" value="08:00" onchange="saveSettings()"><div class="switch"><div><b>Absen Pulang</b><br><small class="muted">Opsional ON/OFF</small></div><input style="width:auto" type="checkbox" id="checkoutToggle" onchange="saveSettings()"></div><label>Jam pulang normal</label><input type="time" id="checkoutTime" value="17:00" onchange="saveSettings()"><div class="switch"><div><b>Verifikasi wajah setelah QR</b><br><small class="muted">Opsional</small></div><input style="width:auto" type="checkbox" id="faceToggle" onchange="saveSettings()"></div><button class="btn" style="width:100%;margin:8px 0 12px" onclick="saveSettings(true)">💾 Simpan Pengaturan</button><div class="card" style="background:#f8fbff"><b>Keamanan MFA SMS</b><p id="mfaStatus" class="note">Memeriksa status MFA...</p><div id="mfaEnrollBox"><label>Nomor HP Owner (format +62)</label><input id="mfaPhone" type="tel" placeholder="+628xxxxxxxxxx" autocomplete="tel"><div id="mfaEnrollRecaptcha"></div><button class="btn soft" style="width:100%" onclick="sendMfaEnrollment()">Kirim kode SMS</button><div id="mfaEnrollVerify" class="hidden"><label>Kode SMS</label><input id="mfaEnrollCode" inputmode="numeric" autocomplete="one-time-code" placeholder="6 digit"><button class="btn" style="width:100%" onclick="confirmMfaEnrollment()">Aktifkan MFA</button></div></div><p id="mfaEnrollMessage" role="status" class="note"></p></div></div></section>
 </main>
 <nav><button onclick="window.scrollTo({top:0,behavior:'smooth'})"><b>⌂</b>Dashboard</button><button onclick="startScan()"><b>▣</b>Scan</button><button onclick="goTo('employeeSection')"><b>♙</b>Karyawan</button><button onclick="setReport('day');goTo('reportSection')"><b>☷</b>Laporan</button><button onclick="openPin('settings')"><b>⚙</b>Setting</button></nav>
 <dialog id="scanDlg"><div class="modal"><h3>Scan QR Karyawan</h3><p class="note">Arahkan kamera belakang HP toko ke QR karyawan.</p><div id="reader"></div><div id="scanResult" class="result"></div><button class="btn red" style="width:100%;margin-top:10px" onclick="stopScan()">Tutup Kamera</button></div></dialog>
 <dialog id="qrDlg"><div class="modal"><h3 id="qrName"></h3><div style="text-align:center"><img id="qrImg" width="230"><p id="qrText" class="qr"></p></div><p class="note">QR ini dapat ditampilkan dari HP karyawan atau dicetak sebagai kartu.</p><button class="btn" style="width:100%" onclick="qrDlg.close()">Tutup</button></div></dialog>
 <dialog id="empDlg"><div class="modal"><h3>Tambah Karyawan</h3><label>Nama</label><input id="newName"><label>Jabatan</label><input id="newJob"><label>Foto / Wajah Referensi</label><input id="newPhoto" type="file" accept="image/*" capture="user"><p class="note">Foto ini menjadi profil dan referensi awal untuk modul verifikasi wajah.</p><button class="btn" style="width:100%" onclick="addEmployee()">Simpan & Buat QR</button><button class="btn red" style="width:100%;margin-top:8px" onclick="empDlg.close()">Batal</button></div></dialog>
-<dialog id="statusDlg"><div class="modal"><h3>Status Kehadiran</h3><select id="statusEmployee"></select><input type="date" id="statusDate"><select id="statusValue"><option>IZIN</option><option>SAKIT</option><option>CUTI</option></select><button class="btn" style="width:100%" onclick="saveManualStatus()">Simpan</button><button class="btn red" style="width:100%;margin-top:8px" onclick="statusDlg.close()">Batal</button></div></dialog><dialog id="faceDlg"><div class="modal"><h3>Scan Wajah • Opsional</h3><p class="note">Kamera wajah v5 dapat diuji setelah aplikasi berjalan melalui HTTPS. Pencocokan biometrik nyata belum diaktifkan pada demo ini.</p><video id="faceVideo" autoplay playsinline muted style="width:100%;border-radius:14px;background:#111;min-height:230px"></video><div id="faceResult" class="result"></div><button class="btn" style="width:100%;margin-top:10px" onclick="simulateFaceCheck()">Verifikasi Wajah Demo</button><button class="btn red" style="width:100%;margin-top:8px" onclick="stopFace()">Tutup Kamera</button></div></dialog><dialog id="checkoutDlg"><div class="modal"><h3>Absen Pulang • Opsional</h3><p class="note">Pilih karyawan yang sudah absen masuk hari ini.</p><select id="checkoutEmployee"></select><button class="btn" style="width:100%" onclick="recordCheckout()">Catat Pulang Sekarang</button><button class="btn red" style="width:100%;margin-top:8px" onclick="checkoutDlg.close()">Batal</button></div></dialog><dialog id="pinDlg"><div class="modal"><h3>Akses Owner / Admin</h3><p class="note">Masukkan PIN untuk membuka menu yang dilindungi.</p><input id="pinInput" type="password" inputmode="numeric" maxlength="8" placeholder="PIN"><div id="pinError" style="display:none;color:#c92c2c;font-size:12px;margin-bottom:10px">PIN salah. Coba lagi.</div><button class="btn" style="width:100%" onclick="submitPin()">Buka</button><button class="btn red" style="width:100%;margin-top:8px" onclick="closePin()">Batal</button><button class="btn soft" style="width:100%;margin-top:8px" onclick="resetDemoPin()">Reset PIN Demo ke 1234</button></div></dialog>
+<dialog id="statusDlg"><div class="modal"><h3>Status Kehadiran</h3><select id="statusEmployee"></select><input type="date" id="statusDate"><select id="statusValue"><option>IZIN</option><option>SAKIT</option><option>CUTI</option></select><button class="btn" style="width:100%" onclick="saveManualStatus()">Simpan</button><button class="btn red" style="width:100%;margin-top:8px" onclick="statusDlg.close()">Batal</button></div></dialog><dialog id="faceDlg"><div class="modal"><h3>Scan Wajah • Opsional</h3><p class="note">Kamera wajah v5 dapat diuji setelah aplikasi berjalan melalui HTTPS. Pencocokan biometrik nyata belum diaktifkan pada demo ini.</p><video id="faceVideo" autoplay playsinline muted style="width:100%;border-radius:14px;background:#111;min-height:230px"></video><div id="faceResult" class="result"></div><button class="btn" style="width:100%;margin-top:10px" onclick="simulateFaceCheck()">Verifikasi Wajah Demo</button><button class="btn red" style="width:100%;margin-top:8px" onclick="stopFace()">Tutup Kamera</button></div></dialog><dialog id="checkoutDlg"><div class="modal"><h3>Absen Pulang • Opsional</h3><p class="note">Pilih karyawan yang sudah absen masuk hari ini.</p><select id="checkoutEmployee"></select><button class="btn" style="width:100%" onclick="recordCheckout()">Catat Pulang Sekarang</button><button class="btn red" style="width:100%;margin-top:8px" onclick="checkoutDlg.close()">Batal</button></div></dialog><dialog id="pinDlg"><div class="modal"><h3>Akses Owner / Admin</h3><p class="note">Masukkan PIN untuk membuka menu yang dilindungi.</p><input id="pinInput" type="password" inputmode="numeric" maxlength="8" placeholder="PIN"><div id="pinError" style="display:none;color:#c92c2c;font-size:12px;margin-bottom:10px">PIN salah. Coba lagi.</div><button class="btn" style="width:100%" onclick="submitPin()">Buka</button><button class="btn red" style="width:100%;margin-top:8px" onclick="closePin()">Batal</button></div></dialog>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -62,7 +62,7 @@ let payroll={},finance=[]; // Data keuangan hanya dimuat dari Firestore setelah 
 localStorage.removeItem('oa6_payroll');localStorage.removeItem('oa6_finance');
 workTime.value=localStorage.getItem('oa4_work')||'08:00';faceToggle.checked=localStorage.getItem('oa4_face')==='1';checkoutToggle.checked=localStorage.getItem('oa51_checkout')==='1';checkoutTime.value=localStorage.getItem('oa51_checkout_time')||'17:00';
 function tick(){clock.textContent=new Date().toLocaleString('id-ID',{dateStyle:'full',timeStyle:'medium'})}tick();setInterval(tick,1000);
-function save(){if(!currentRole)return;localStorage.setItem('oa4_emps',JSON.stringify(employees));localStorage.setItem('oa4_logs',JSON.stringify(logs));/* Tidak menyimpan gaji di browser bersama. *//* Tidak menyimpan keuangan di browser bersama. */syncEmployeesToFirestore();syncLogsToFirestore()}
+function save(){if(!currentRole)return;localStorage.setItem('oa4_emps',JSON.stringify(employees));localStorage.setItem('oa4_logs',JSON.stringify(logs));/* Data keuangan tidak disimpan di browser bersama. */}
 async function syncEmployeesToFirestore(){try{for(const e of employees){await firestoreDb.collection('employees').doc(e.id).set({id:e.id,name:e.name,job:e.job||'Karyawan',photo:e.photo||'',updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true})}console.log('Firebase: employees tersinkron')}catch(err){console.error('Firebase sync error:',err)}}
 async function loadEmployeesFromFirestore(){
   try{
@@ -107,21 +107,129 @@ function goReport(){report('today');goTo('reportSection')}
 function changePin(){alert('Ubah password melalui Firebase Authentication. PIN lokal tidak lagi digunakan.')}
 function render(){emps.innerHTML=employees.map(e=>`<div class="emp"><div class="avatar">${e.photo?`<img src="${e.photo}">`:e.name.slice(0,2).toUpperCase()}</div><div class="grow"><b>${e.name}</b><br><small>${e.job}</small><br><span class="qr">${e.id}</span></div><div style="display:flex;gap:5px;flex-wrap:wrap"><button class="btn soft" onclick="showQR('${e.id}')">QR</button><button class="btn soft" onclick="editEmployee('${e.id}')">Edit</button><button class="btn red" onclick="deleteEmployee('${e.id}')">Hapus</button></div></div>`).join('');renderLogs();stats();security();renderPayroll();renderReportEmployeeFilter()}
 function security(){let ok=location.protocol==='https:'||location.hostname==='localhost';secureInfo.innerHTML=ok?'<div class="secure">✓ Mode kamera aman terdeteksi. Berikan izin kamera saat Chrome meminta.</div>':'<div class="warn"><b>Kamera mungkin diblokir.</b><br>File ini sedang tidak dibuka melalui HTTPS/localhost. Untuk scanner kamera yang benar-benar berfungsi di HP, upload/host aplikasi ini pada alamat HTTPS.</div>'}
-function ownerCheck(){if(!currentRole){alert('Login diperlukan.');return false}return true}
-function editEmployee(id){if(!ownerCheck())return;let e=employees.find(x=>x.id===id);if(!e)return;let n=prompt('Nama karyawan',e.name);if(n===null)return;n=n.trim();if(!n)return alert('Nama tidak boleh kosong.');let j=prompt('Jabatan',e.job);if(j===null)return;e.name=n;e.job=j.trim()||'Karyawan';logs.forEach(x=>{if(x.id===id)x.name=e.name});save();render()}
-function deleteEmployee(id){if(!ownerCheck())return;let e=employees.find(x=>x.id===id);if(!e)return;if(!confirm('Hapus '+e.name+'? Data absensi karyawan ini juga akan dihapus.'))return;employees=employees.filter(x=>x.id!==id);logs=logs.filter(x=>x.id!==id);save();render()}
-function resetAttendance(){alert('Reset dinonaktifkan pada v6.6 agar data cloud tidak terhapus sebagian.');return;if(!ownerCheck())return;if(!confirm('Hapus SEMUA riwayat absensi testing? Data karyawan tetap ada.'))return;logs=[];save();render();reportBox.innerHTML='Data absensi sudah dikosongkan.'}
-function resetDemo(){alert('Hapus demo dinonaktifkan pada v6.6; lakukan setelah backup dan prosedur penghapusan cloud.');return;if(!ownerCheck())return;if(!confirm('Hapus semua karyawan dan seluruh data absensi demo?'))return;employees=[];logs=[];save();render();reportBox.innerHTML='Data demo sudah dihapus. Silakan masukkan karyawan real.'}
+function ownerCheck(){if(currentRole!=='OWNER'&&currentRole!=='ADMIN'){alert('Akses Owner/Admin diperlukan.');return false}return true}
+function editEmployee(id){if(!ownerCheck())return;let e=employees.find(x=>x.id===id);if(!e)return;let n=prompt('Nama karyawan',e.name);if(n===null)return;n=n.trim();if(!n)return alert('Nama tidak boleh kosong.');let j=prompt('Jabatan',e.job);if(j===null)return;e.name=n;e.job=j.trim()||'Karyawan';logs.forEach(x=>{if(x.id===id)x.name=e.name});save();firestoreDb.collection('employees').doc(id).set({name:e.name,job:e.job,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true}).catch(err=>alert('Gagal menyimpan karyawan: '+err.message));render()}
+// Operasi hapus menggunakan batch Firestore agar data cloud dan tampilan tetap konsisten.
+async function deleteFirestoreDocs(docs){
+  for(let i=0;i<docs.length;i+=400){
+    const batch=firestoreDb.batch();
+    docs.slice(i,i+400).forEach(doc=>batch.delete(doc.ref));
+    await batch.commit();
+  }
+}
+async function deleteEmployee(id){
+  if(currentRole!=='OWNER')return alert('Hanya Owner yang dapat menghapus karyawan.');
+  const e=employees.find(x=>x.id===id);if(!e)return;
+  if(finance.some(x=>x.id===id)||payroll[id])return alert('Karyawan ini memiliki riwayat gaji, kasbon, atau pinjaman. Ekspor dan selesaikan data keuangannya sebelum penghapusan.');
+  if(!confirm('Hapus karyawan '+e.name+' beserta seluruh riwayat absensinya dari Firebase? Tindakan ini tidak dapat dibatalkan.'))return;
+  try{
+    const attendance=await firestoreDb.collection('attendance').where('id','==',id).get();
+    // Dokumen absensi dihapus dahulu, kemudian master karyawan.
+    await deleteFirestoreDocs(attendance.docs);
+    await firestoreDb.collection('employees').doc(id).delete();
+    employees=employees.filter(x=>x.id!==id);
+    logs=logs.filter(x=>x.id!==id);
+    localStorage.setItem('oa4_emps',JSON.stringify(employees));
+    localStorage.setItem('oa4_logs',JSON.stringify(logs));
+    render();alert('Karyawan dan riwayat absensinya berhasil dihapus dari Firebase.');
+  }catch(err){console.error('Hapus karyawan gagal:',err);alert('Penghapusan belum selesai: '+err.message+'\nPeriksa koneksi lalu coba lagi.');await Promise.all([loadEmployeesFromFirestore(),loadLogsFromFirestore()]);}
+}
+async function resetAttendance(){
+  if(currentRole!=='OWNER')return alert('Hanya Owner yang dapat mereset absensi.');
+  if(!confirm('Hapus SEMUA riwayat absensi dari Firebase? Data karyawan dan keuangan tetap disimpan.'))return;
+  if(prompt('Ketik RESET ABSENSI untuk melanjutkan:')!=='RESET ABSENSI')return;
+  try{
+    const snapshot=await firestoreDb.collection('attendance').get();
+    await deleteFirestoreDocs(snapshot.docs);
+    logs=[];localStorage.setItem('oa4_logs','[]');render();
+    alert('Riwayat absensi berhasil dikosongkan.');
+  }catch(err){console.error(err);alert('Reset absensi belum selesai: '+err.message);await loadLogsFromFirestore();}
+}
+async function resetDemo(){
+  if(currentRole!=='OWNER')return alert('Hanya Owner yang dapat mereset data demo.');
+  if(!confirm('Hapus SEMUA karyawan dan absensi dari Firebase? Data gaji, kasbon, pinjaman dan pembayaran TIDAK dihapus. Pastikan Anda sudah ekspor data yang diperlukan.'))return;
+  if(prompt('Ketik HAPUS DATA DEMO untuk konfirmasi:')!=='HAPUS DATA DEMO')return;
+  try{
+    const [att,emp]=await Promise.all([firestoreDb.collection('attendance').get(),firestoreDb.collection('employees').get()]);
+    await deleteFirestoreDocs(att.docs);
+    await deleteFirestoreDocs(emp.docs);
+    employees=[];logs=[];
+    localStorage.setItem('oa4_emps','[]');localStorage.setItem('oa4_logs','[]');
+    render();alert('Karyawan dan absensi demo berhasil dihapus. Data keuangan tetap tersimpan.');
+  }catch(err){console.error('Reset demo gagal:',err);alert('Reset belum selesai: '+err.message+'\nPeriksa koneksi lalu coba lagi.');await Promise.all([loadEmployeesFromFirestore(),loadLogsFromFirestore()]);}
+}
 let currentRole=null;
+let mfaResolver=null,mfaLoginVerificationId=null,mfaEnrollVerificationId=null;
+let mfaLoginRecaptcha=null,mfaEnrollRecaptcha=null;
+function mfaError(err){return ({'auth/invalid-verification-code':'Kode SMS salah atau kedaluwarsa.','auth/too-many-requests':'Terlalu banyak percobaan. Coba lagi nanti.','auth/operation-not-allowed':'SMS MFA belum tersedia untuk proyek ini. Periksa pengaturan Firebase dan paket billing.','auth/requires-recent-login':'Demi keamanan, logout lalu login kembali sebelum mendaftarkan nomor.'})[err?.code]||err?.message||'Proses SMS gagal.'}
 async function doLogin(){
-  loginError.textContent='';const email=loginEmail.value.trim(),password=loginPassword.value;
-  if(!email||!password){loginError.textContent='Isi email dan password.';return}
-  try{const cred=await firebaseAuth.signInWithEmailAndPassword(email,password);
-    const doc=await firestoreDb.collection('users').doc(cred.user.uid).get();
-    const role=doc.exists?doc.data().role:null;
-    if(role!=='OWNER'&&role!=='ADMIN')throw Error('Akun belum diberi role OWNER/ADMIN di Firestore.');
-    // onAuthStateChanged mengaktifkan sesi satu kali.
-  }catch(err){loginError.textContent=err.message||'Login gagal.';await firebaseAuth.signOut();}
+ loginError.textContent='';const email=loginEmail.value.trim(),password=loginPassword.value;
+ if(!email||!password){loginError.textContent='Isi email dan password.';return}
+ try{const cred=await firebaseAuth.signInWithEmailAndPassword(email,password);
+   const doc=await firestoreDb.collection('users').doc(cred.user.uid).get();
+   const role=doc.exists?doc.data().role:null;
+   if(role!=='OWNER'&&role!=='ADMIN')throw Error('Akun belum diberi role OWNER/ADMIN di Firestore.');
+ }catch(err){
+   if(err.code==='auth/multi-factor-auth-required'){
+     mfaResolver=err.resolver||firebaseAuth.getMultiFactorResolver(err);
+     loginPassword.value='';loginScreen.style.display='none';mfaChallengeScreen.classList.remove('hidden');mfaChallengeScreen.style.display='grid';
+     mfaLoginError.textContent='';mfaLoginVerificationId=null;
+     return;
+   }
+   loginError.textContent=mfaError(err);await firebaseAuth.signOut();
+ }
+}
+async function sendMfaLoginCode(){
+ if(!mfaResolver)return;
+ mfaLoginError.textContent='';
+ try{
+   const hint=mfaResolver.hints.find(h=>h.factorId===firebase.auth.PhoneMultiFactorGenerator.FACTOR_ID);
+   if(!hint)throw Error('Akun ini tidak memiliki faktor SMS.');
+   if(!mfaLoginRecaptcha)mfaLoginRecaptcha=new firebase.auth.RecaptchaVerifier('mfaLoginRecaptcha',{size:'normal'},firebaseAuth);
+   const provider=new firebase.auth.PhoneAuthProvider(firebaseAuth);
+   mfaLoginVerificationId=await provider.verifyPhoneNumber({multiFactorHint:hint,session:mfaResolver.session},mfaLoginRecaptcha);
+   mfaLoginError.style.color='#167747';mfaLoginError.textContent='Kode SMS telah dikirim.';
+ }catch(err){mfaLoginError.style.color='#c92c2c';mfaLoginError.textContent=mfaError(err);if(mfaLoginRecaptcha){mfaLoginRecaptcha.clear();mfaLoginRecaptcha=null}}
+}
+async function verifyMfaLogin(){
+ mfaLoginError.style.color='#c92c2c';mfaLoginError.textContent='';
+ if(!mfaLoginVerificationId)return mfaLoginError.textContent='Klik Kirim kode SMS terlebih dahulu.';
+ try{
+   const credential=firebase.auth.PhoneAuthProvider.credential(mfaLoginVerificationId,mfaLoginCode.value.trim());
+   const assertion=firebase.auth.PhoneMultiFactorGenerator.assertion(credential);
+   await mfaResolver.resolveSignIn(assertion);
+   mfaResolver=null;mfaLoginVerificationId=null;mfaChallengeScreen.style.display='none';
+ }catch(err){mfaLoginError.textContent=mfaError(err)}
+}
+function cancelMfaLogin(){mfaResolver=null;mfaLoginVerificationId=null;mfaChallengeScreen.style.display='none';loginScreen.style.display='grid';loginPassword.value='';mfaLoginCode.value='';if(mfaLoginRecaptcha){mfaLoginRecaptcha.clear();mfaLoginRecaptcha=null}}
+async function refreshMfaStatus(){
+ if(!firebaseAuth.currentUser)return;
+ const factors=firebaseAuth.currentUser.multiFactor.enrolledFactors||[];
+ const enrolled=factors.some(f=>f.factorId===firebase.auth.PhoneMultiFactorGenerator.FACTOR_ID);
+ mfaStatus.textContent=enrolled?'MFA SMS aktif untuk akun ini.':'MFA SMS belum didaftarkan untuk akun ini.';
+ mfaEnrollBox.style.display=enrolled?'none':'block';
+}
+async function sendMfaEnrollment(){
+ mfaEnrollMessage.textContent='';const phone=mfaPhone.value.trim();
+ if(!/^\+[1-9]\d{7,14}$/.test(phone)){mfaEnrollMessage.textContent='Masukkan nomor internasional, contoh +6281234567890.';return}
+ try{
+   const user=firebaseAuth.currentUser;if(!user)throw Error('Silakan login kembali.');
+   if(!mfaEnrollRecaptcha)mfaEnrollRecaptcha=new firebase.auth.RecaptchaVerifier('mfaEnrollRecaptcha',{size:'normal'},firebaseAuth);
+   const session=await user.multiFactor.getSession();
+   const provider=new firebase.auth.PhoneAuthProvider(firebaseAuth);
+   mfaEnrollVerificationId=await provider.verifyPhoneNumber({phoneNumber:phone,session},mfaEnrollRecaptcha);
+   mfaEnrollVerify.classList.remove('hidden');mfaEnrollMessage.textContent='Kode SMS dikirim. Masukkan kode untuk mengaktifkan MFA.';
+ }catch(err){mfaEnrollMessage.textContent=mfaError(err);if(mfaEnrollRecaptcha){mfaEnrollRecaptcha.clear();mfaEnrollRecaptcha=null}}
+}
+async function confirmMfaEnrollment(){
+ if(!mfaEnrollVerificationId)return mfaEnrollMessage.textContent='Kirim kode SMS terlebih dahulu.';
+ try{
+   const credential=firebase.auth.PhoneAuthProvider.credential(mfaEnrollVerificationId,mfaEnrollCode.value.trim());
+   const assertion=firebase.auth.PhoneMultiFactorGenerator.assertion(credential);
+   await firebaseAuth.currentUser.multiFactor.enroll(assertion,'HP Owner');
+   mfaEnrollVerificationId=null;mfaEnrollCode.value='';mfaEnrollMessage.textContent='MFA SMS berhasil diaktifkan.';
+   await refreshMfaStatus();
+ }catch(err){mfaEnrollMessage.textContent=mfaError(err)}
 }
 let unsubEmployees=null,unsubAttendance=null,unsubSettings=null,unsubFinance=null;
 async function activateSession(role){
@@ -131,14 +239,14 @@ async function activateSession(role){
  if(role==='OWNER'){await loadOwnerFinanceFromFirestore();watchOwnerFinanceFirestore();}
  else {payroll={};finance=[];ownerFinanceSyncReady=false;}
  await Promise.all([loadEmployeesFromFirestore(),loadLogsFromFirestore(),loadSettingsFromFirestore()]);
- watchFirestore();watchSettingsFirestore();render();
+ watchFirestore();watchSettingsFirestore();render();await refreshMfaStatus();
 }
 async function logoutApp(){
  if(unsubEmployees)unsubEmployees();if(unsubAttendance)unsubAttendance();if(unsubSettings)unsubSettings();if(unsubFinance)unsubFinance();
  unsubEmployees=unsubAttendance=unsubSettings=unsubFinance=null;
  await firebaseAuth.signOut();currentRole=null;payroll={};finance=[];ownerFinanceSyncReady=false;
  localStorage.removeItem('oa6_payroll');localStorage.removeItem('oa6_finance');
- loginPassword.value='';roleBadge.textContent='';loginScreen.style.display='grid';
+ loginPassword.value='';roleBadge.textContent='';loginScreen.style.display='grid';mfaChallengeScreen.style.display='none';
 }
 
 function requireOwner(){if(currentRole!=='OWNER'){alert('Menu ini hanya dapat diakses Owner.');return false}return true}
@@ -168,23 +276,23 @@ let dr=document.getElementById('salaryDailyRows');if(dr){let rows=[],fid=filter?
 let h=document.getElementById('salaryHistory');if(h){let paid=finance.filter(x=>x.kind==='GAJI'&&x.status==='LOCKED');h.innerHTML=paid.length?paid.map(x=>{let e=employees.find(q=>q.id===x.id);return `<div class="emp"><div class="grow"><b>${e?e.name:x.id}</b> <span class="tag">LOCKED</span><br><small>${x.from} s/d ${x.to} • ${x.days} hari • Kotor ${money(x.gross)} • Bersih ${money(x.net)}<br>Dibayar ${x.date} ${x.time||''}</small></div></div>`}).join(''):'Belum ada pembayaran.'}}
 function salaryPayment(){if(!requireOwner())return;let e=pickEmployee();if(!e)return;let x=salaryRights(e),kas=activeDebt(e.id,'KASBON'),loan=finance.find(z=>z.id===e.id&&z.kind==='PINJAMAN'&&z.balance>0),loanCut=loan?Math.min(loan.balance,loan.installment):0,kasCut=Math.min(kas,Math.max(0,x.due-loanCut)),net=Math.max(0,x.due-kasCut-loanCut);if(!confirm(`Hak gaji ${money(x.due)}\nPotong kasbon ${money(kasCut)}\nCicilan pinjaman ${money(loanCut)}\nGaji bersih ${money(net)}\n\nCatat pembayaran?`))return;let rem=kasCut;finance.filter(z=>z.id===e.id&&z.kind==='KASBON'&&z.balance>0).forEach(z=>{let q=Math.min(z.balance,rem);z.balance-=q;rem-=q;if(z.balance<=0)z.status='LUNAS'});if(loan){loan.balance-=loanCut;if(loan.balance<=0)loan.status='LUNAS'}finance.unshift({kind:'GAJI',id:e.id,gross:x.due,net,kasbon:kasCut,loan:loanCut,date:new Date().toLocaleDateString('sv-SE')});save();render();alert('Pembayaran gaji berhasil dicatat.')}
 function showQR(id){let e=employees.find(x=>x.id===id);qrName.textContent='QR • '+e.name;qrText.textContent=id;qrImg.src='https://api.qrserver.com/v1/create-qr-code/?size=300x300&data='+encodeURIComponent(id);qrDlg.showModal()}
-function addEmployee(){let n=newName.value.trim(),j=newJob.value.trim();if(!n)return alert('Nama wajib diisi.');let nums=employees.map(e=>parseInt(e.id.split('-').pop())||0),id='OF-KRY-'+String(Math.max(0,...nums)+1).padStart(3,'0'),f=newPhoto.files[0];function done(photo){employees.push({id,name:n,job:j||'Karyawan',photo});save();render();newName.value='';newJob.value='';newPhoto.value='';empDlg.close()}if(f){let r=new FileReader();r.onload=()=>done(r.result);r.readAsDataURL(f)}else done('')}
+function addEmployee(){let n=newName.value.trim(),j=newJob.value.trim();if(!n)return alert('Nama wajib diisi.');let nums=employees.map(e=>parseInt(e.id.split('-').pop())||0),id='OF-KRY-'+String(Math.max(0,...nums)+1).padStart(3,'0'),f=newPhoto.files[0];function done(photo){employees.push({id,name:n,job:j||'Karyawan',photo});save();firestoreDb.collection('employees').doc(id).set({id,name:n,job:j||'Karyawan',photo,updatedAt:firebase.firestore.FieldValue.serverTimestamp()}).catch(err=>alert('Gagal menyimpan karyawan: '+err.message));render();newName.value='';newJob.value='';newPhoto.value='';empDlg.close()}if(f){let r=new FileReader();r.onload=()=>done(r.result);r.readAsDataURL(f)}else done('')}
 async function startScan(){scanDlg.showModal();scanResult.style.display='none';if(!(location.protocol==='https:'||location.hostname==='localhost')){scanResult.style.display='block';scanResult.innerHTML='<b>Akses kamera memerlukan HTTPS.</b><br>Versi v4 sudah siap kamera, tetapi file perlu dipasang pada hosting HTTPS terlebih dahulu.';return}scanner=new Html5Qrcode('reader');try{await scanner.start({facingMode:'environment'},{fps:10,qrbox:{width:240,height:240}},onScan)}catch(e){scanResult.style.display='block';scanResult.innerHTML='<b>Kamera tidak dapat dibuka.</b><br>Periksa izin Camera untuk Chrome lalu coba lagi.'}}
 function onScan(text){if(Date.now()-lastScan<2500)return;lastScan=Date.now();let e=employees.find(x=>x.id===text);scanResult.style.display='block';if(!e){scanResult.innerHTML='<b>QR tidak terdaftar.</b>';return}if(faceToggle.checked){scanResult.innerHTML=`<b>QR dikenali: ${e.name}</b><br>Verifikasi wajah aktif (modul wajah nyata belum diaktifkan pada v4).`;setTimeout(()=>record(e),700)}else record(e)}
-function record(e){let d=new Date(),day=d.toLocaleDateString('sv-SE'),existing=logs.find(x=>x.id===e.id&&x.day===day&&x.type==='MASUK');scanResult.style.display='block';if(existing){scanResult.innerHTML=`<b>✓ ${e.name} sudah absen MASUK hari ini</b><br>Jam masuk: ${existing.time}<br><small>Scan ulang tidak dicatat sebagai pulang.</small>`;return}let tm=d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}),[h,m]=workTime.value.split(':').map(Number),late=d.getHours()*60+d.getMinutes()>h*60+m;logs.unshift({id:e.id,name:e.name,type:'MASUK',time:tm,day,late});save();render();scanResult.innerHTML=`<b>✓ Absensi MASUK berhasil</b><br>${e.name} • ${tm}${late?' • Terlambat':''}`;if(navigator.vibrate)navigator.vibrate(150)}
+function record(e){let d=new Date(),day=d.toLocaleDateString('sv-SE'),existing=logs.find(x=>x.id===e.id&&x.day===day&&x.type==='MASUK');scanResult.style.display='block';if(existing){scanResult.innerHTML=`<b>✓ ${e.name} sudah absen MASUK hari ini</b><br>Jam masuk: ${existing.time}<br><small>Scan ulang tidak dicatat sebagai pulang.</small>`;return}let tm=d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}),[h,m]=workTime.value.split(':').map(Number),late=d.getHours()*60+d.getMinutes()>h*60+m;logs.unshift({id:e.id,name:e.name,type:'MASUK',time:tm,day,late});save();syncLogsToFirestore();render();scanResult.innerHTML=`<b>✓ Absensi MASUK berhasil</b><br>${e.name} • ${tm}${late?' • Terlambat':''}`;if(navigator.vibrate)navigator.vibrate(150)}
 let faceStream=null;
 async function startFace(){faceDlg.showModal();faceResult.style.display='none';if(!(location.protocol==='https:'||location.hostname==='localhost')){faceResult.style.display='block';faceResult.innerHTML='<b>Kamera wajah memerlukan HTTPS.</b><br>Pasang v5 pada hosting HTTPS untuk mengaktifkan kamera.';return}try{faceStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});faceVideo.srcObject=faceStream}catch(e){faceResult.style.display='block';faceResult.innerHTML='<b>Kamera depan tidak dapat dibuka.</b><br>Periksa izin Camera di Chrome.'}}
 function simulateFaceCheck(){faceResult.style.display='block';faceResult.innerHTML='<b>Mode demo v5:</b> kamera wajah sudah disiapkan. Pencocokan identitas wajah nyata akan menjadi tahap berikutnya. Untuk absensi saat ini gunakan QR/barcode.'}
 function stopFace(){if(faceStream){faceStream.getTracks().forEach(t=>t.stop());faceStream=null}faceVideo.srcObject=null;faceDlg.close()}
 function openCheckout(){if(!checkoutToggle.checked)return alert('Absen pulang sedang OFF. Aktifkan di Pengaturan.');let day=new Date().toLocaleDateString('sv-SE'),present=employees.filter(e=>logs.some(x=>x.id===e.id&&x.day===day&&x.type==='MASUK'));checkoutEmployee.innerHTML=present.length?present.map(e=>`<option value="${e.id}">${e.name}</option>`).join(''):'<option value="">Belum ada yang absen masuk</option>';checkoutDlg.showModal()}
-function recordCheckout(){let id=checkoutEmployee.value;if(!id)return alert('Belum ada karyawan yang absen masuk.');let e=employees.find(x=>x.id===id),d=new Date(),day=d.toLocaleDateString('sv-SE'),masuk=logs.find(x=>x.id===id&&x.day===day&&x.type==='MASUK');if(!masuk)return alert('Karyawan belum absen masuk.');let existing=logs.find(x=>x.id===id&&x.day===day&&x.type==='PULANG');if(existing)return alert('Jam pulang sudah tercatat: '+existing.time);let tm=d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});logs.unshift({id:e.id,name:e.name,type:'PULANG',time:tm,day,late:false});save();render();checkoutDlg.close();alert('Absen pulang '+e.name+' tercatat '+tm)}
+function recordCheckout(){let id=checkoutEmployee.value;if(!id)return alert('Belum ada karyawan yang absen masuk.');let e=employees.find(x=>x.id===id),d=new Date(),day=d.toLocaleDateString('sv-SE'),masuk=logs.find(x=>x.id===id&&x.day===day&&x.type==='MASUK');if(!masuk)return alert('Karyawan belum absen masuk.');let existing=logs.find(x=>x.id===id&&x.day===day&&x.type==='PULANG');if(existing)return alert('Jam pulang sudah tercatat: '+existing.time);let tm=d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});logs.unshift({id:e.id,name:e.name,type:'PULANG',time:tm,day,late:false});save();syncLogsToFirestore();render();checkoutDlg.close();alert('Absen pulang '+e.name+' tercatat '+tm)}
 function renderLogs(){let day=new Date().toLocaleDateString('sv-SE'),a=logs.filter(x=>x.day===day);document.getElementById('logs').innerHTML=a.length?a.map(l=>`<div class="emp"><div class="avatar">${l.name.slice(0,2).toUpperCase()}</div><div class="grow"><b>${l.name}</b><br><small>${l.type} • ${l.time}</small></div><span class="tag ${l.late?'late':''}">${l.late?'Terlambat':'Tercatat'}</span></div>`).join(''):'<span class="note">Belum ada absensi.</span>'}
 function stats(){let day=new Date().toLocaleDateString('sv-SE'),ins=logs.filter(x=>x.day===day&&x.type==='MASUK'),ids=[...new Set(ins.map(x=>x.id))];sHadir.textContent=ids.length;sLate.textContent=ins.filter(x=>x.late).length;sBelum.textContent=Math.max(0,employees.length-ids.length)}
 function report(mode){let today=new Date().toLocaleDateString('sv-SE'),days=mode==='today'?[today]:[...new Set(logs.map(x=>x.day))].sort().reverse(),rows=[];days.forEach(day=>employees.forEach(e=>{let masuk=logs.find(x=>x.day===day&&x.id===e.id&&x.type==='MASUK');if(!masuk)return;let pulang=logs.find(x=>x.day===day&&x.id===e.id&&x.type==='PULANG'),dur='—';if(pulang){let [mh,mm]=masuk.time.split(/[.:]/).map(Number),[ph,pm]=pulang.time.split(/[.:]/).map(Number),mins=ph*60+pm-(mh*60+mm);if(mins>=0)dur=Math.floor(mins/60)+'j '+mins%60+'m'}rows.push(`${day} • <b>${e.name}</b><br>Masuk ${masuk.time}${masuk.late?' • Terlambat':''} • Pulang ${pulang?pulang.time:'—'} • Jam kerja ${dur}`)}));reportBox.innerHTML=rows.length?rows.join('<hr style="border:0;border-top:1px solid #eee">'):'Belum ada data.'}
 function ymd(d){return d.toLocaleDateString('sv-SE')}
 function parseYmd(x){let a=x.split('-').map(Number);return new Date(a[0],a[1]-1,a[2])}
 function openStatus(){if(!currentRole)return alert('Silakan login.');statusEmployee.innerHTML=employees.map(e=>`<option value="${e.id}">${e.name}</option>`).join('');statusDate.value=ymd(new Date());statusDlg.showModal()}
-function saveManualStatus(){let e=employees.find(x=>x.id===statusEmployee.value),day=statusDate.value,val=statusValue.value;if(!e||!day)return;logs=logs.filter(x=>!(x.id===e.id&&x.day===day&&['IZIN','SAKIT','CUTI'].includes(x.type)));logs.unshift({id:e.id,name:e.name,type:val,time:'—',day,late:false});save();render();statusDlg.close()}
+function saveManualStatus(){let e=employees.find(x=>x.id===statusEmployee.value),day=statusDate.value,val=statusValue.value;if(!e||!day)return;logs=logs.filter(x=>!(x.id===e.id&&x.day===day&&['IZIN','SAKIT','CUTI'].includes(x.type)));logs.unshift({id:e.id,name:e.name,type:val,time:'—',day,late:false});save();syncLogsToFirestore();render();statusDlg.close()}
 function setReport(k){let n=new Date(),a,b;if(k==='day')a=b=ymd(n);else if(k==='week'){let x=new Date(n);x.setDate(n.getDate()-6);a=ymd(x);b=ymd(n)}else{a=ymd(new Date(n.getFullYear(),n.getMonth(),1));b=ymd(new Date(n.getFullYear(),n.getMonth()+1,0))}dateFrom.value=a;dateTo.value=b;buildReport(a,b)}
 function customReport(){if(!dateFrom.value||!dateTo.value)return alert('Pilih tanggal.');if(dateFrom.value>dateTo.value)return alert('Periode tidak valid.');buildReport(dateFrom.value,dateTo.value)}
 function renderReportEmployeeFilter(){let f=document.getElementById('reportEmployeeFilter');if(!f)return;let keep=f.value||'ALL';f.innerHTML='<option value="ALL">Semua Karyawan</option>'+employees.map(e=>`<option value="${e.id}">${e.name}</option>`).join('');if([...f.options].some(o=>o.value===keep))f.value=keep}
@@ -235,7 +343,7 @@ async function loadOwnerFinanceFromFirestore(){
       if(typeof renderPayroll==='function') renderPayroll();
       if(typeof render==='function') render();
     }else{
-      await syncOwnerFinanceToFirestore();
+      console.warn('Data gaji belum tersedia di Firestore. Tidak membuat dokumen kosong otomatis.');
     }
 
     ownerFinanceSyncReady=true;
