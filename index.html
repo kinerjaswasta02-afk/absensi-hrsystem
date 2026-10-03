@@ -4,7 +4,7 @@
 <div class="card" style="width:min(430px,100%);margin:0"><div class="brand" style="margin-bottom:12px">ABSENSI <span>SYSTEM</span></div><h2>Login Attendance</h2>
 <label>Email akun Firebase</label><input id="loginEmail" type="email" autocomplete="username" placeholder="email@contoh.com"><label>Password</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Password"><p id="loginError" role="alert" style="color:#c92c2c;font-size:12px"></p>
 <button class="btn" style="width:100%" onclick="doLogin()">Masuk</button></div></div>
-<div id="mfaChallengeScreen" class="hidden" style="position:fixed;inset:0;background:#f4f7fb;z-index:110;place-items:center;padding:18px"><div class="card" style="width:min(430px,100%);margin:0"><div class="brand">ABSENSI <span>SYSTEM</span></div><h2>Verifikasi SMS</h2><p class="note">Masukkan kode yang dikirim ke nomor HP terdaftar.</p><div id="mfaLoginRecaptcha"></div><button id="mfaSendLoginBtn" class="btn soft" style="width:100%" onclick="sendMfaLoginCode()">Kirim kode SMS</button><label>Kode verifikasi</label><input id="mfaLoginCode" inputmode="numeric" autocomplete="one-time-code" placeholder="6 digit"><p id="mfaLoginError" role="alert" style="color:#c92c2c;font-size:12px"></p><button class="btn" style="width:100%" onclick="verifyMfaLogin()">Verifikasi & Masuk</button><button class="btn red" style="width:100%;margin-top:8px" onclick="cancelMfaLogin()">Batal</button></div></div><header><div class="brand">ocean <span>furniture</span></div><div><span id="roleBadge" class="ver"></span> <span class="ver">ATTENDANCE v6.7.2.3 TEST MFA</span> <button id="logoutButton" class="btn red" style="padding:7px 10px" onclick="logoutApp()">Logout</button></div></header>
+<div id="mfaChallengeScreen" class="hidden" style="position:fixed;inset:0;background:#f4f7fb;z-index:110;place-items:center;padding:18px"><div class="card" style="width:min(430px,100%);margin:0"><div class="brand">ABSENSI <span>SYSTEM</span></div><h2>Verifikasi SMS</h2><p class="note">Masukkan kode yang dikirim ke nomor HP terdaftar.</p><div id="mfaLoginRecaptcha"></div><button id="mfaSendLoginBtn" class="btn soft" style="width:100%" onclick="sendMfaLoginCode()">Kirim kode SMS</button><label>Kode verifikasi</label><input id="mfaLoginCode" inputmode="numeric" autocomplete="one-time-code" placeholder="6 digit"><p id="mfaLoginError" role="alert" style="color:#c92c2c;font-size:12px"></p><button class="btn" style="width:100%" onclick="verifyMfaLogin()">Verifikasi & Masuk</button><button class="btn red" style="width:100%;margin-top:8px" onclick="cancelMfaLogin()">Batal</button></div></div><header><div class="brand">ocean <span>furniture</span></div><div><span id="roleBadge" class="ver"></span> <span class="ver">ATTENDANCE v6.7.2.4 TEST MFA</span> <button id="logoutButton" class="btn red" style="padding:7px 10px" onclick="logoutApp()">Logout</button></div></header>
 <main>
 <section class="hero"><h2>Absensi Karyawan</h2><div id="clock"></div><div class="stats"><div class="stat"><b id="sHadir">0</b><small>Hadir</small></div><div class="stat"><b id="sLate">0</b><small>Terlambat</small></div><div class="stat"><b id="sBelum">3</b><small>Belum masuk</small></div></div></section>
 <section class="card"><div class="actions"><button class="btn" onclick="startScan()">▣ Scan QR / Barcode</button><button class="btn dark" onclick="startFace()">☺ Scan Wajah</button></div><button class="btn soft" style="width:100%;margin-top:9px" onclick="openCheckout()">↩ Absen Pulang Opsional</button><p class="note"><b>Aturan:</b> QR/barcode adalah metode utama. Scan wajah bersifat opsional. Keduanya hanya mencatat MASUK satu kali per hari. Pulang memakai menu khusus dan bersifat opsional.</p><div id="secureInfo"></div></section>
@@ -161,7 +161,7 @@ async function resetDemo(){
 let currentRole=null;
 let mfaResolver=null,mfaLoginVerificationId=null,mfaEnrollVerificationId=null;
 let mfaLoginRecaptcha=null,mfaEnrollRecaptcha=null;
-function mfaError(err){return ({'auth/invalid-verification-code':'Kode SMS salah atau kedaluwarsa.','auth/too-many-requests':'Terlalu banyak percobaan. Coba lagi nanti.','auth/operation-not-allowed':'SMS MFA belum tersedia untuk proyek ini. Periksa pengaturan Firebase dan paket billing.','auth/requires-recent-login':'Demi keamanan, logout lalu login kembali sebelum mendaftarkan nomor.'})[err?.code]||err?.message||'Proses SMS gagal.'}
+function mfaError(err){return ({'auth/invalid-api-key':'Firebase menolak API key saat membuat reCAPTCHA. Cocokkan API key aplikasi Web di Firebase Project Settings dengan Google Cloud Credentials (project yang sama).','auth/invalid-verification-code':'Kode SMS salah atau kedaluwarsa.','auth/too-many-requests':'Terlalu banyak percobaan. Coba lagi nanti.','auth/operation-not-allowed':'SMS MFA belum tersedia untuk proyek ini. Periksa pengaturan Firebase dan paket billing.','auth/requires-recent-login':'Demi keamanan, logout lalu login kembali sebelum mendaftarkan nomor.'})[err?.code]||err?.message||'Proses SMS gagal.'}
 async function doLogin(){
  loginError.textContent='';const email=loginEmail.value.trim(),password=loginPassword.value;
  if(!email||!password){loginError.textContent='Isi email dan password.';return}
@@ -185,7 +185,7 @@ async function sendMfaLoginCode(){
  try{
    const hint=mfaResolver.hints.find(h=>h.factorId===firebase.auth.PhoneMultiFactorGenerator.FACTOR_ID);
    if(!hint)throw Error('Akun ini tidak memiliki faktor SMS.');
-   if(!mfaLoginRecaptcha)mfaLoginRecaptcha=new firebase.auth.RecaptchaVerifier('mfaLoginRecaptcha',{size:'normal'},firebaseAuth);
+   if(!mfaLoginRecaptcha){mfaLoginRecaptcha=new firebase.auth.RecaptchaVerifier('mfaLoginRecaptcha',{size:'normal'},firebaseAuth);await mfaLoginRecaptcha.render();}
    const provider=new firebase.auth.PhoneAuthProvider(firebaseAuth);
    mfaLoginVerificationId=await provider.verifyPhoneNumber({multiFactorHint:hint,session:mfaResolver.session},mfaLoginRecaptcha);
    mfaLoginError.style.color='#167747';mfaLoginError.textContent='Kode SMS telah dikirim.';
@@ -216,7 +216,7 @@ async function sendMfaEnrollment(){
  try{
    const user=firebaseAuth.currentUser;if(!user)throw Error('Silakan login kembali.');
    mfaStage='membuat reCAPTCHA';
-   if(!mfaEnrollRecaptcha)mfaEnrollRecaptcha=new firebase.auth.RecaptchaVerifier('mfaEnrollRecaptcha',{size:'normal'},firebaseAuth);
+   if(!mfaEnrollRecaptcha){mfaEnrollRecaptcha=new firebase.auth.RecaptchaVerifier('mfaEnrollRecaptcha',{size:'normal'},firebaseAuth);await mfaEnrollRecaptcha.render();}
    mfaStage='mendapatkan sesi MFA';
    const session=await user.multiFactor.getSession();
    mfaStage='verifikasi nomor melalui Firebase';
@@ -225,7 +225,7 @@ async function sendMfaEnrollment(){
    mfaEnrollVerify.classList.remove('hidden');mfaEnrollMessage.textContent='Kode SMS dikirim. Masukkan kode untuk mengaktifkan MFA.';
  }catch(err){
    const code=err?.code||'unknown';
-   console.error('[MFA SMS TEST] Tahap:',mfaStage,'Kode:',code,'Pesan:',err?.message||'Tidak ada rincian');
+   console.error('[MFA SMS TEST] Tahap:',mfaStage,'Kode:',code,'Pesan:',err?.message||'Tidak ada rincian');if(code==='auth/invalid-api-key')console.error('[MFA SMS TEST] Periksa kecocokan Firebase Web App API key dengan Google Cloud Credentials dan status key. Jangan bagikan key/OTP melalui screenshot.');
    mfaEnrollMessage.textContent='Gagal pada tahap: '+mfaStage+' | Kode: '+code+' | '+mfaError(err);
    if(mfaEnrollRecaptcha){try{mfaEnrollRecaptcha.clear()}catch(e){}mfaEnrollRecaptcha=null}
  }
