@@ -4,7 +4,7 @@
 <div class="card" style="width:min(430px,100%);margin:0"><div class="brand" style="margin-bottom:12px">ABSENSI <span>SYSTEM</span></div><h2>Login Attendance</h2>
 <label>Email akun Firebase</label><input id="loginEmail" type="email" autocomplete="username" placeholder="email@contoh.com"><label>Password</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Password"><p id="loginError" role="alert" style="color:#c92c2c;font-size:12px"></p>
 <button class="btn" style="width:100%" onclick="doLogin()">Masuk</button></div></div>
-<div id="mfaChallengeScreen" class="hidden" style="position:fixed;inset:0;background:#f4f7fb;z-index:110;place-items:center;padding:18px"><div class="card" style="width:min(430px,100%);margin:0"><div class="brand">ABSENSI <span>SYSTEM</span></div><h2>Verifikasi SMS</h2><p class="note">Masukkan kode yang dikirim ke nomor HP terdaftar.</p><div id="mfaLoginRecaptcha"></div><button id="mfaSendLoginBtn" class="btn soft" style="width:100%" onclick="sendMfaLoginCode()">Kirim kode SMS</button><label>Kode verifikasi</label><input id="mfaLoginCode" inputmode="numeric" autocomplete="one-time-code" placeholder="6 digit"><p id="mfaLoginError" role="alert" style="color:#c92c2c;font-size:12px"></p><button class="btn" style="width:100%" onclick="verifyMfaLogin()">Verifikasi & Masuk</button><button class="btn red" style="width:100%;margin-top:8px" onclick="cancelMfaLogin()">Batal</button></div></div><header><div class="brand">ocean <span>furniture</span></div><div><span id="roleBadge" class="ver"></span> <span class="ver">ATTENDANCE v6.7.2.2</span> <button id="logoutButton" class="btn red" style="padding:7px 10px" onclick="logoutApp()">Logout</button></div></header>
+<div id="mfaChallengeScreen" class="hidden" style="position:fixed;inset:0;background:#f4f7fb;z-index:110;place-items:center;padding:18px"><div class="card" style="width:min(430px,100%);margin:0"><div class="brand">ABSENSI <span>SYSTEM</span></div><h2>Verifikasi SMS</h2><p class="note">Masukkan kode yang dikirim ke nomor HP terdaftar.</p><div id="mfaLoginRecaptcha"></div><button id="mfaSendLoginBtn" class="btn soft" style="width:100%" onclick="sendMfaLoginCode()">Kirim kode SMS</button><label>Kode verifikasi</label><input id="mfaLoginCode" inputmode="numeric" autocomplete="one-time-code" placeholder="6 digit"><p id="mfaLoginError" role="alert" style="color:#c92c2c;font-size:12px"></p><button class="btn" style="width:100%" onclick="verifyMfaLogin()">Verifikasi & Masuk</button><button class="btn red" style="width:100%;margin-top:8px" onclick="cancelMfaLogin()">Batal</button></div></div><header><div class="brand">ocean <span>furniture</span></div><div><span id="roleBadge" class="ver"></span> <span class="ver">ATTENDANCE v6.7.2.3 TEST MFA</span> <button id="logoutButton" class="btn red" style="padding:7px 10px" onclick="logoutApp()">Logout</button></div></header>
 <main>
 <section class="hero"><h2>Absensi Karyawan</h2><div id="clock"></div><div class="stats"><div class="stat"><b id="sHadir">0</b><small>Hadir</small></div><div class="stat"><b id="sLate">0</b><small>Terlambat</small></div><div class="stat"><b id="sBelum">3</b><small>Belum masuk</small></div></div></section>
 <section class="card"><div class="actions"><button class="btn" onclick="startScan()">▣ Scan QR / Barcode</button><button class="btn dark" onclick="startFace()">☺ Scan Wajah</button></div><button class="btn soft" style="width:100%;margin-top:9px" onclick="openCheckout()">↩ Absen Pulang Opsional</button><p class="note"><b>Aturan:</b> QR/barcode adalah metode utama. Scan wajah bersifat opsional. Keduanya hanya mencatat MASUK satu kali per hari. Pulang memakai menu khusus dan bersifat opsional.</p><div id="secureInfo"></div></section>
@@ -210,16 +210,25 @@ async function refreshMfaStatus(){
  mfaEnrollBox.style.display=enrolled?'none':'block';
 }
 async function sendMfaEnrollment(){
- mfaEnrollMessage.textContent='';const phone=mfaPhone.value.trim();
+ let mfaStage='validasi nomor';
+ mfaEnrollMessage.style.color='#c92c2c';mfaEnrollMessage.textContent='';const phone=mfaPhone.value.trim();
  if(!/^\+[1-9]\d{7,14}$/.test(phone)){mfaEnrollMessage.textContent='Masukkan nomor internasional, contoh +6281234567890.';return}
  try{
    const user=firebaseAuth.currentUser;if(!user)throw Error('Silakan login kembali.');
+   mfaStage='membuat reCAPTCHA';
    if(!mfaEnrollRecaptcha)mfaEnrollRecaptcha=new firebase.auth.RecaptchaVerifier('mfaEnrollRecaptcha',{size:'normal'},firebaseAuth);
+   mfaStage='mendapatkan sesi MFA';
    const session=await user.multiFactor.getSession();
+   mfaStage='verifikasi nomor melalui Firebase';
    const provider=new firebase.auth.PhoneAuthProvider(firebaseAuth);
    mfaEnrollVerificationId=await provider.verifyPhoneNumber({phoneNumber:phone,session},mfaEnrollRecaptcha);
    mfaEnrollVerify.classList.remove('hidden');mfaEnrollMessage.textContent='Kode SMS dikirim. Masukkan kode untuk mengaktifkan MFA.';
- }catch(err){mfaEnrollMessage.textContent=mfaError(err);if(mfaEnrollRecaptcha){mfaEnrollRecaptcha.clear();mfaEnrollRecaptcha=null}}
+ }catch(err){
+   const code=err?.code||'unknown';
+   console.error('[MFA SMS TEST] Tahap:',mfaStage,'Kode:',code,'Pesan:',err?.message||'Tidak ada rincian');
+   mfaEnrollMessage.textContent='Gagal pada tahap: '+mfaStage+' | Kode: '+code+' | '+mfaError(err);
+   if(mfaEnrollRecaptcha){try{mfaEnrollRecaptcha.clear()}catch(e){}mfaEnrollRecaptcha=null}
+ }
 }
 async function confirmMfaEnrollment(){
  if(!mfaEnrollVerificationId)return mfaEnrollMessage.textContent='Kirim kode SMS terlebih dahulu.';
