@@ -4,7 +4,7 @@
 <div class="card" style="width:min(430px,100%);margin:0"><div class="brand" style="margin-bottom:12px">ABSENSI <span>SYSTEM</span></div><h2>Login Attendance</h2>
 <label>Email akun Firebase</label><input id="loginEmail" type="email" autocomplete="username" placeholder="email@contoh.com"><label>Password</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Password"><p id="loginError" role="alert" style="color:#c92c2c;font-size:12px"></p>
 <button class="btn" style="width:100%" onclick="doLogin()">Masuk</button></div></div>
-<div id="mfaChallengeScreen" class="hidden" style="position:fixed;inset:0;background:#f4f7fb;z-index:110;place-items:center;padding:18px"><div class="card" style="width:min(430px,100%);margin:0"><div class="brand">ABSENSI <span>SYSTEM</span></div><h2>Verifikasi SMS</h2><p class="note">Masukkan kode yang dikirim ke nomor HP terdaftar.</p><div id="mfaLoginRecaptcha"></div><button id="mfaSendLoginBtn" class="btn soft" style="width:100%" onclick="sendMfaLoginCode()">Kirim kode SMS</button><label>Kode verifikasi</label><input id="mfaLoginCode" inputmode="numeric" autocomplete="one-time-code" placeholder="6 digit"><p id="mfaLoginError" role="alert" style="color:#c92c2c;font-size:12px"></p><button class="btn" style="width:100%" onclick="verifyMfaLogin()">Verifikasi & Masuk</button><button class="btn red" style="width:100%;margin-top:8px" onclick="cancelMfaLogin()">Batal</button></div></div><header><div class="brand">ocean <span>furniture</span></div><div><span id="roleBadge" class="ver"></span> <span class="ver">ATTENDANCE v6.7.2.6 TEST SPARK</span> <button id="logoutButton" class="btn red" style="padding:7px 10px" onclick="logoutApp()">Logout</button></div></header>
+<div id="mfaChallengeScreen" class="hidden" style="position:fixed;inset:0;background:#f4f7fb;z-index:110;place-items:center;padding:18px"><div class="card" style="width:min(430px,100%);margin:0"><div class="brand">ABSENSI <span>SYSTEM</span></div><h2>Verifikasi SMS</h2><p class="note">Masukkan kode yang dikirim ke nomor HP terdaftar.</p><div id="mfaLoginRecaptcha"></div><button id="mfaSendLoginBtn" class="btn soft" style="width:100%" onclick="sendMfaLoginCode()">Kirim kode SMS</button><label>Kode verifikasi</label><input id="mfaLoginCode" inputmode="numeric" autocomplete="one-time-code" placeholder="6 digit"><p id="mfaLoginError" role="alert" style="color:#c92c2c;font-size:12px"></p><button class="btn" style="width:100%" onclick="verifyMfaLogin()">Verifikasi & Masuk</button><button class="btn red" style="width:100%;margin-top:8px" onclick="cancelMfaLogin()">Batal</button></div></div><header><div class="brand">ocean <span>furniture</span></div><div><span id="roleBadge" class="ver"></span> <span class="ver">ATTENDANCE v6.7.2.7 TEST PIN</span> <button id="logoutButton" class="btn red" style="padding:7px 10px" onclick="logoutApp()">Logout</button></div></header>
 <main>
 <section class="hero"><h2>Absensi Karyawan</h2><div id="clock"></div><div class="stats"><div class="stat"><b id="sHadir">0</b><small>Hadir</small></div><div class="stat"><b id="sLate">0</b><small>Terlambat</small></div><div class="stat"><b id="sBelum">3</b><small>Belum masuk</small></div></div></section>
 <section class="card"><div class="actions"><button class="btn" onclick="startScan()">▣ Scan QR / Barcode</button><button class="btn dark" onclick="startFace()">☺ Scan Wajah</button></div><button class="btn soft" style="width:100%;margin-top:9px" onclick="openCheckout()">↩ Absen Pulang Opsional</button><p class="note"><b>Aturan:</b> QR/barcode adalah metode utama. Scan wajah bersifat opsional. Keduanya hanya mencatat MASUK satu kali per hari. Pulang memakai menu khusus dan bersifat opsional.</p><div id="secureInfo"></div></section>
@@ -30,13 +30,13 @@
 <h4>Riwayat Pembayaran / Locked</h4><div id="salaryHistory" class="note"></div></section><section class="card" id="exportSection"><h3>Export Data</h3>
 <p class="note">Admin dapat export Absensi. Owner dapat export seluruh data termasuk Gaji, Pembayaran Locked, Kasbon, Pinjaman, dan Master Karyawan.</p>
 <div class="actions"><button class="btn soft" onclick="exportAttendanceCSV()">Export Absensi</button><button class="btn ownerOnly" onclick="exportOwnerWorkbook()">Export Semua Data</button></div>
-</section><section class="card" id="settingsSection"><h3>Pengaturan Owner/Admin</h3><button class="btn dark" style="width:100%" onclick="openPin('settings')">🔒 Buka Pengaturan</button><div id="settings" class="hidden"><label>Jam masuk normal</label><input type="time" id="workTime" value="08:00" onchange="saveSettings()"><div class="switch"><div><b>Absen Pulang</b><br><small class="muted">Opsional ON/OFF</small></div><input style="width:auto" type="checkbox" id="checkoutToggle" onchange="saveSettings()"></div><label>Jam pulang normal</label><input type="time" id="checkoutTime" value="17:00" onchange="saveSettings()"><div class="switch"><div><b>Verifikasi wajah setelah QR</b><br><small class="muted">Opsional</small></div><input style="width:auto" type="checkbox" id="faceToggle" onchange="saveSettings()"></div><button class="btn" style="width:100%;margin:8px 0 12px" onclick="saveSettings(true)">💾 Simpan Pengaturan</button></div></section>
+</section><section class="card" id="settingsSection"><h3>Pengaturan Jam Kerja</h3><p class="note">PIN hanya dapat dibuat dan diganti oleh Owner. Admin harus memasukkan PIN untuk mengubah jadwal.</p><button id="ownerPinBtn" class="btn soft ownerOnly" style="width:100%;margin-bottom:8px" onclick="changePin()">🔑 Atur / Ganti PIN (Owner)</button><button class="btn dark" style="width:100%" onclick="openPin('settings')">🔒 Buka Pengaturan</button><div id="settings" class="hidden"><label>Jam masuk normal</label><input type="time" id="workTime" value="08:00" onchange="saveSettings()"><div class="switch"><div><b>Absen Pulang</b><br><small class="muted">Opsional ON/OFF</small></div><input style="width:auto" type="checkbox" id="checkoutToggle" onchange="saveSettings()"></div><label>Jam pulang normal</label><input type="time" id="checkoutTime" value="17:00" onchange="saveSettings()"><div class="switch"><div><b>Verifikasi wajah setelah QR</b><br><small class="muted">Opsional</small></div><input style="width:auto" type="checkbox" id="faceToggle" onchange="saveSettings()"></div><button class="btn" style="width:100%;margin:8px 0 12px" onclick="saveSettings(true)">💾 Simpan Pengaturan</button></div></section>
 </main>
 <nav><button onclick="window.scrollTo({top:0,behavior:'smooth'})"><b>⌂</b>Dashboard</button><button onclick="startScan()"><b>▣</b>Scan</button><button onclick="goTo('employeeSection')"><b>♙</b>Karyawan</button><button onclick="setReport('day');goTo('reportSection')"><b>☷</b>Laporan</button><button onclick="openPin('settings')"><b>⚙</b>Setting</button></nav>
 <dialog id="scanDlg"><div class="modal"><h3>Scan QR Karyawan</h3><p class="note">Arahkan kamera belakang HP toko ke QR karyawan.</p><div id="reader"></div><div id="scanResult" class="result"></div><button class="btn red" style="width:100%;margin-top:10px" onclick="stopScan()">Tutup Kamera</button></div></dialog>
 <dialog id="qrDlg"><div class="modal"><h3 id="qrName"></h3><div style="text-align:center"><img id="qrImg" width="230"><p id="qrText" class="qr"></p></div><p class="note">QR ini dapat ditampilkan dari HP karyawan atau dicetak sebagai kartu.</p><button class="btn" style="width:100%" onclick="qrDlg.close()">Tutup</button></div></dialog>
 <dialog id="empDlg"><div class="modal"><h3>Tambah Karyawan</h3><label>Nama</label><input id="newName"><label>Jabatan</label><input id="newJob"><label>Foto / Wajah Referensi</label><input id="newPhoto" type="file" accept="image/*" capture="user"><p class="note">Foto ini menjadi profil dan referensi awal untuk modul verifikasi wajah.</p><button class="btn" style="width:100%" onclick="addEmployee()">Simpan & Buat QR</button><button class="btn red" style="width:100%;margin-top:8px" onclick="empDlg.close()">Batal</button></div></dialog>
-<dialog id="statusDlg"><div class="modal"><h3>Status Kehadiran</h3><select id="statusEmployee"></select><input type="date" id="statusDate"><select id="statusValue"><option>IZIN</option><option>SAKIT</option><option>CUTI</option></select><button class="btn" style="width:100%" onclick="saveManualStatus()">Simpan</button><button class="btn red" style="width:100%;margin-top:8px" onclick="statusDlg.close()">Batal</button></div></dialog><dialog id="faceDlg"><div class="modal"><h3>Scan Wajah • Opsional</h3><p class="note">Kamera wajah v5 dapat diuji setelah aplikasi berjalan melalui HTTPS. Pencocokan biometrik nyata belum diaktifkan pada demo ini.</p><video id="faceVideo" autoplay playsinline muted style="width:100%;border-radius:14px;background:#111;min-height:230px"></video><div id="faceResult" class="result"></div><button class="btn" style="width:100%;margin-top:10px" onclick="simulateFaceCheck()">Verifikasi Wajah Demo</button><button class="btn red" style="width:100%;margin-top:8px" onclick="stopFace()">Tutup Kamera</button></div></dialog><dialog id="checkoutDlg"><div class="modal"><h3>Absen Pulang • Opsional</h3><p class="note">Pilih karyawan yang sudah absen masuk hari ini.</p><select id="checkoutEmployee"></select><button class="btn" style="width:100%" onclick="recordCheckout()">Catat Pulang Sekarang</button><button class="btn red" style="width:100%;margin-top:8px" onclick="checkoutDlg.close()">Batal</button></div></dialog><dialog id="pinDlg"><div class="modal"><h3>Akses Owner / Admin</h3><p class="note">Masukkan PIN untuk membuka menu yang dilindungi.</p><input id="pinInput" type="password" inputmode="numeric" maxlength="8" placeholder="PIN"><div id="pinError" style="display:none;color:#c92c2c;font-size:12px;margin-bottom:10px">PIN salah. Coba lagi.</div><button class="btn" style="width:100%" onclick="submitPin()">Buka</button><button class="btn red" style="width:100%;margin-top:8px" onclick="closePin()">Batal</button></div></dialog>
+<dialog id="statusDlg"><div class="modal"><h3>Status Kehadiran</h3><select id="statusEmployee"></select><input type="date" id="statusDate"><select id="statusValue"><option>IZIN</option><option>SAKIT</option><option>CUTI</option></select><button class="btn" style="width:100%" onclick="saveManualStatus()">Simpan</button><button class="btn red" style="width:100%;margin-top:8px" onclick="statusDlg.close()">Batal</button></div></dialog><dialog id="faceDlg"><div class="modal"><h3>Scan Wajah • Opsional</h3><p class="note">Kamera wajah v5 dapat diuji setelah aplikasi berjalan melalui HTTPS. Pencocokan biometrik nyata belum diaktifkan pada demo ini.</p><video id="faceVideo" autoplay playsinline muted style="width:100%;border-radius:14px;background:#111;min-height:230px"></video><div id="faceResult" class="result"></div><button class="btn" style="width:100%;margin-top:10px" onclick="simulateFaceCheck()">Verifikasi Wajah Demo</button><button class="btn red" style="width:100%;margin-top:8px" onclick="stopFace()">Tutup Kamera</button></div></dialog><dialog id="checkoutDlg"><div class="modal"><h3>Absen Pulang • Opsional</h3><p class="note">Pilih karyawan yang sudah absen masuk hari ini.</p><select id="checkoutEmployee"></select><button class="btn" style="width:100%" onclick="recordCheckout()">Catat Pulang Sekarang</button><button class="btn red" style="width:100%;margin-top:8px" onclick="checkoutDlg.close()">Batal</button></div></dialog><dialog id="pinDlg"><div class="modal"><h3>PIN Pengaturan</h3><p class="note">Masukkan PIN untuk membuka menu yang dilindungi.</p><input id="pinInput" type="password" inputmode="numeric" maxlength="8" placeholder="PIN"><div id="pinError" style="display:none;color:#c92c2c;font-size:12px;margin-bottom:10px">PIN salah. Coba lagi.</div><button class="btn" style="width:100%" onclick="submitPin()">Buka</button><button class="btn red" style="width:100%;margin-top:8px" onclick="closePin()">Batal</button></div></dialog>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -88,23 +88,55 @@ async function loadLogsFromFirestore(){try{const snap=await firestoreDb.collecti
 function watchFirestore(){if(unsubEmployees)unsubEmployees();if(unsubAttendance)unsubAttendance();unsubEmployees=firestoreDb.collection('employees').onSnapshot(()=>loadEmployeesFromFirestore(),err=>console.error('Employee realtime error:',err));unsubAttendance=firestoreDb.collection('attendance').onSnapshot(snap=>{logs=snap.docs.map(d=>{let x=d.data()||{};delete x.updatedAt;return x});localStorage.setItem('oa4_logs',JSON.stringify(logs));render()},err=>console.error('Attendance realtime error:',err))}
 async function testFirebaseConnection(){try{const snap=await firestoreDb.collection('employees').limit(10).get();console.log('Firebase connected. employees:',snap.size);return true}catch(err){console.error('Firebase connection failed:',err);return false}}
 async function saveSettings(showMessage=false){
+ if(!currentRole || !settingsUnlocked){if(showMessage)alert("Buka Pengaturan menggunakan PIN terlebih dahulu.");return;}
  const cfg={workTime:workTime.value||'08:00',faceEnabled:!!faceToggle.checked,checkoutEnabled:!!checkoutToggle.checked,checkoutTime:checkoutTime.value||'17:00'};
  localStorage.setItem('oa4_work',cfg.workTime);localStorage.setItem('oa4_face',cfg.faceEnabled?'1':'0');localStorage.setItem('oa51_checkout',cfg.checkoutEnabled?'1':'0');localStorage.setItem('oa51_checkout_time',cfg.checkoutTime);
  try{await firestoreDb.collection('settings').doc('attendance').set({...cfg,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});if(showMessage)alert('Pengaturan berhasil disimpan dan disinkronkan ke semua perangkat.')}
  catch(err){console.error('Firebase settings sync error:',err);if(showMessage)alert('Pengaturan tersimpan lokal, tetapi sinkron Firebase gagal.')}
 }
 function applyRemoteSettings(d){if(!d)return;if(d.workTime){workTime.value=d.workTime;localStorage.setItem('oa4_work',d.workTime)}if(typeof d.faceEnabled==='boolean'){faceToggle.checked=d.faceEnabled;localStorage.setItem('oa4_face',d.faceEnabled?'1':'0')}if(typeof d.checkoutEnabled==='boolean'){checkoutToggle.checked=d.checkoutEnabled;localStorage.setItem('oa51_checkout',d.checkoutEnabled?'1':'0')}if(d.checkoutTime){checkoutTime.value=d.checkoutTime;localStorage.setItem('oa51_checkout_time',d.checkoutTime)}}
-async function loadSettingsFromFirestore(){try{const doc=await firestoreDb.collection('settings').doc('attendance').get();if(doc.exists)applyRemoteSettings(doc.data());else await saveSettings(false);return true}catch(err){console.error('Firebase settings load error:',err);return false}}
+async function loadSettingsFromFirestore(){try{const doc=await firestoreDb.collection('settings').doc('attendance').get();if(doc.exists)applyRemoteSettings(doc.data());else {applyRemoteSettings({workTime:"08:00",checkoutTime:"17:00",checkoutEnabled:false,faceEnabled:false})}return true}catch(err){console.error('Firebase settings load error:',err);return false}}
 function watchSettingsFirestore(){if(unsubSettings)unsubSettings();unsubSettings=firestoreDb.collection('settings').doc('attendance').onSnapshot(doc=>{if(doc.exists)applyRemoteSettings(doc.data())},err=>console.error('Settings realtime error:',err))}
-function pin(){return null} // PIN demo dinonaktifkan; Firebase Authentication wajib.
-let pendingPinAction='';
-function openPin(action){if(!currentRole)return alert('Silakan login.');if(action==='employee')empDlg.showModal();else{settings.classList.remove('hidden');goTo('settingsSection')}}
-function closePin(){pinDlg.close()}
-function submitPin(){if(pinInput.value!==pin()){pinError.style.display='block';return}pinDlg.close();if(pendingPinAction==='employee')empDlg.showModal();else{settings.classList.remove('hidden');goTo('settingsSection')}}
-function resetDemoPin(){alert('Reset PIN demo dinonaktifkan. Gunakan Firebase Authentication.')}
+// PIN versi TEST: pembatasan antarmuka. Aturan Firestore sisi server tetap diperlukan sebelum produksi.
+let settingsUnlocked=false, pendingPinAction='', pinRecord=null;
+async function loadSettingsPin(){
+ try{const doc=await firestoreDb.collection('settings').doc('accessPin').get();pinRecord=doc.exists?doc.data():null}
+ catch(err){pinRecord=null;console.error('Gagal memuat konfigurasi PIN:',err);}
+}
+async function hashSettingsPin(value,salt){
+ const bytes=new TextEncoder().encode(salt+':'+value);
+ const digest=await crypto.subtle.digest('SHA-256',bytes);
+ return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+function lockSettings(){settingsUnlocked=false;settings.classList.add('hidden');}
+async function openPin(action){
+ if(!currentRole)return alert('Silakan login.');
+ if(action==='employee'){if(currentRole!=='OWNER'&&currentRole!=='ADMIN')return alert('Akses ditolak.');empDlg.showModal();return;}
+ lockSettings();pendingPinAction='settings';pinInput.value='';pinError.style.display='none';
+ await loadSettingsPin();
+ if(!pinRecord?.hash)return alert('PIN belum diatur. Minta Owner membuka menu Atur / Ganti PIN.');
+ pinDlg.showModal();
+}
+function closePin(){pinInput.value='';pinDlg.close();}
+async function submitPin(){
+ if(pendingPinAction!=='settings'||!pinRecord?.hash)return;
+ const input=pinInput.value.trim();
+ if(!/^\d{4,8}$/.test(input)||await hashSettingsPin(input,pinRecord.salt)!==pinRecord.hash){pinError.style.display='block';pinInput.value='';return;}
+ closePin();settingsUnlocked=true;settings.classList.remove('hidden');goTo('settingsSection');
+}
+async function changePin(){
+ if(currentRole!=='OWNER')return alert('Hanya Owner dapat membuat atau mengganti PIN.');
+ const next=prompt('PIN baru Pengaturan (4–8 digit angka):');if(next===null)return;
+ if(!/^\d{4,8}$/.test(next))return alert('PIN harus 4–8 digit angka.');
+ const confirmPin=prompt('Ulangi PIN baru:');if(confirmPin!==next)return alert('Konfirmasi PIN tidak cocok.');
+ const salt=Array.from(crypto.getRandomValues(new Uint8Array(16))).map(x=>x.toString(16).padStart(2,'0')).join('');
+ const record={salt,hash:await hashSettingsPin(next,salt),updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
+ try{await firestoreDb.collection('settings').doc('accessPin').set(record);pinRecord={salt,hash:record.hash};lockSettings();alert('PIN berhasil disimpan. Buka kembali Pengaturan dengan PIN baru.');}
+ catch(err){console.error(err);alert('Gagal menyimpan PIN: '+err.message);}
+}
+function resetDemoPin(){return changePin();}
 function goTo(id){document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'})}
 function goReport(){report('today');goTo('reportSection')}
-function changePin(){alert('Ubah password melalui Firebase Authentication. PIN lokal tidak lagi digunakan.')}
 function render(){emps.innerHTML=employees.map(e=>`<div class="emp"><div class="avatar">${e.photo?`<img src="${e.photo}">`:e.name.slice(0,2).toUpperCase()}</div><div class="grow"><b>${e.name}</b><br><small>${e.job}</small><br><span class="qr">${e.id}</span></div><div style="display:flex;gap:5px;flex-wrap:wrap"><button class="btn soft" onclick="showQR('${e.id}')">QR</button><button class="btn soft" onclick="editEmployee('${e.id}')">Edit</button><button class="btn red" onclick="deleteEmployee('${e.id}')">Hapus</button></div></div>`).join('');renderLogs();stats();security();renderPayroll();renderReportEmployeeFilter()}
 function security(){let ok=location.protocol==='https:'||location.hostname==='localhost';secureInfo.innerHTML=ok?'<div class="secure">✓ Mode kamera aman terdeteksi. Berikan izin kamera saat Chrome meminta.</div>':'<div class="warn"><b>Kamera mungkin diblokir.</b><br>File ini sedang tidak dibuka melalui HTTPS/localhost. Untuk scanner kamera yang benar-benar berfungsi di HP, upload/host aplikasi ini pada alamat HTTPS.</div>'}
 function ownerCheck(){if(currentRole!=='OWNER'&&currentRole!=='ADMIN'){alert('Akses Owner/Admin diperlukan.');return false}return true}
@@ -264,18 +296,18 @@ async function confirmMfaEnrollment(){
 }
 let unsubEmployees=null,unsubAttendance=null,unsubSettings=null,unsubFinance=null;
 async function activateSession(role){
- currentRole=role;loginScreen.style.display='none';roleBadge.textContent=role;
+ currentRole=role;lockSettings();loginScreen.style.display='none';roleBadge.textContent=role;
  document.querySelectorAll('.ownerOnly').forEach(x=>x.style.display=role==='OWNER'?'block':'none');
  document.getElementById('payrollSection').style.display=role==='OWNER'?'block':'none';
  if(role==='OWNER'){await loadOwnerFinanceFromFirestore();watchOwnerFinanceFirestore();}
  else {payroll={};finance=[];ownerFinanceSyncReady=false;}
- await Promise.all([loadEmployeesFromFirestore(),loadLogsFromFirestore(),loadSettingsFromFirestore()]);
+ await Promise.all([loadEmployeesFromFirestore(),loadLogsFromFirestore(),loadSettingsFromFirestore(),loadSettingsPin()]);
  watchFirestore();watchSettingsFirestore();render();
 }
 async function logoutApp(){
  if(unsubEmployees)unsubEmployees();if(unsubAttendance)unsubAttendance();if(unsubSettings)unsubSettings();if(unsubFinance)unsubFinance();
  unsubEmployees=unsubAttendance=unsubSettings=unsubFinance=null;
- await firebaseAuth.signOut();currentRole=null;payroll={};finance=[];ownerFinanceSyncReady=false;
+ lockSettings();pinRecord=null;await firebaseAuth.signOut();currentRole=null;payroll={};finance=[];ownerFinanceSyncReady=false;
  localStorage.removeItem('oa6_payroll');localStorage.removeItem('oa6_finance');
  loginPassword.value='';roleBadge.textContent='';loginScreen.style.display='grid';mfaChallengeScreen.style.display='none';
 }
