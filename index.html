@@ -4,14 +4,14 @@
 <div class="card" style="width:min(430px,100%);margin:0"><div class="brand" style="margin-bottom:12px">ABSENSI <span>SYSTEM</span></div><h2>Login Attendance</h2>
 <label>Email akun Firebase</label><input id="loginEmail" type="email" autocomplete="username" placeholder="email@contoh.com"><label>Password</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Password"><p id="loginError" role="alert" style="color:#c92c2c;font-size:12px"></p>
 <button class="btn" style="width:100%" onclick="doLogin()">Masuk</button></div></div>
-<div id="mfaChallengeScreen" class="hidden" style="position:fixed;inset:0;background:#f4f7fb;z-index:110;place-items:center;padding:18px"><div class="card" style="width:min(430px,100%);margin:0"><div class="brand">ABSENSI <span>SYSTEM</span></div><h2>Verifikasi SMS</h2><p class="note">Masukkan kode yang dikirim ke nomor HP terdaftar.</p><div id="mfaLoginRecaptcha"></div><button id="mfaSendLoginBtn" class="btn soft" style="width:100%" onclick="sendMfaLoginCode()">Kirim kode SMS</button><label>Kode verifikasi</label><input id="mfaLoginCode" inputmode="numeric" autocomplete="one-time-code" placeholder="6 digit"><p id="mfaLoginError" role="alert" style="color:#c92c2c;font-size:12px"></p><button class="btn" style="width:100%" onclick="verifyMfaLogin()">Verifikasi & Masuk</button><button class="btn red" style="width:100%;margin-top:8px" onclick="cancelMfaLogin()">Batal</button></div></div><header><div class="brand">ocean <span>furniture</span></div><div><span id="roleBadge" class="ver"></span> <span class="ver">ATTENDANCE v6.7.2.7 TEST PIN</span> <button id="logoutButton" class="btn red" style="padding:7px 10px" onclick="logoutApp()">Logout</button></div></header>
+<div id="mfaChallengeScreen" class="hidden" style="position:fixed;inset:0;background:#f4f7fb;z-index:110;place-items:center;padding:18px"><div class="card" style="width:min(430px,100%);margin:0"><div class="brand">ABSENSI <span>SYSTEM</span></div><h2>Verifikasi SMS</h2><p class="note">Masukkan kode yang dikirim ke nomor HP terdaftar.</p><div id="mfaLoginRecaptcha"></div><button id="mfaSendLoginBtn" class="btn soft" style="width:100%" onclick="sendMfaLoginCode()">Kirim kode SMS</button><label>Kode verifikasi</label><input id="mfaLoginCode" inputmode="numeric" autocomplete="one-time-code" placeholder="6 digit"><p id="mfaLoginError" role="alert" style="color:#c92c2c;font-size:12px"></p><button class="btn" style="width:100%" onclick="verifyMfaLogin()">Verifikasi & Masuk</button><button class="btn red" style="width:100%;margin-top:8px" onclick="cancelMfaLogin()">Batal</button></div></div><header><div class="brand">ocean <span>furniture</span></div><div><span id="roleBadge" class="ver"></span> <span class="ver">ATTENDANCE v6.7.2.9 TEST</span> <button id="logoutButton" class="btn red" style="padding:7px 10px" onclick="logoutApp()">Logout</button></div></header>
 <main>
 <section class="hero"><h2>Absensi Karyawan</h2><div id="clock"></div><div class="stats"><div class="stat"><b id="sHadir">0</b><small>Hadir</small></div><div class="stat"><b id="sLate">0</b><small>Terlambat</small></div><div class="stat"><b id="sBelum">3</b><small>Belum masuk</small></div></div></section>
 <section class="card"><div class="actions"><button class="btn" onclick="startScan()">▣ Scan QR / Barcode</button><button class="btn dark" onclick="startFace()">☺ Scan Wajah</button></div><button class="btn soft" style="width:100%;margin-top:9px" onclick="openCheckout()">↩ Absen Pulang Opsional</button><p class="note"><b>Aturan:</b> QR/barcode adalah metode utama. Scan wajah bersifat opsional. Keduanya hanya mencatat MASUK satu kali per hari. Pulang memakai menu khusus dan bersifat opsional.</p><div id="secureInfo"></div></section>
 <section class="card" id="employeeSection"><div style="display:flex;justify-content:space-between;align-items:center"><h3>Master Karyawan</h3><button class="btn soft" onclick="openPin('employee')">+ Karyawan</button></div><div id="emps"></div>
 <div class="actions" style="margin-top:12px">
-<button class="btn soft" disabled title="Dinonaktifkan demi keamanan data cloud">Reset Data Absensi (nonaktif)</button>
-<button class="btn red" disabled title="Dinonaktifkan demi keamanan data cloud">Hapus Semua Data Demo (nonaktif)</button>
+<button class="btn soft ownerOnly" onclick="resetAttendance()">Reset Data Absensi (Owner)</button>
+<button class="btn red ownerOnly" onclick="resetDemo()">Hapus Semua Data Demo (Owner)</button>
 </div></section>
 <section class="card"><h3>Riwayat Hari Ini</h3><div id="logs"><span class="note">Belum ada absensi.</span></div></section>
 <section class="card"><h3>Izin / Sakit / Cuti</h3><button class="btn soft" onclick="openStatus()">+ Atur Status</button></section>
@@ -27,7 +27,12 @@
 <label>Filter Karyawan</label>
 <select id="salaryEmployeeFilter" onchange="renderPayroll()"><option value="ALL">Semua Karyawan</option></select>
 <div class="tablewrap"><table class="paytable"><thead><tr><th>Tgl/Hari</th><th>Nama</th><th>Hadir</th><th>Jam</th><th>Upah Hari Ini</th><th>Kasbon</th><th>Pinjaman</th><th>Status</th></tr></thead><tbody id="salaryDailyRows"></tbody></table></div><div id="salaryPeriodSummary" class="card" style="margin-top:10px;background:#f8fbff"></div>
-<h4>Riwayat Pembayaran / Locked</h4><div id="salaryHistory" class="note"></div></section><section class="card" id="exportSection"><h3>Export Data</h3>
+<h4>Riwayat Pembayaran / Locked</h4><div id="salaryHistory" class="note"></div>
+<div class="card" style="margin-top:14px;border:1px solid #f0c8c8;background:#fffafa">
+  <b>Persiapan Data Asli (Owner)</b>
+  <p class="note">Gunakan hanya setelah semua data demo selesai. Ekspor cadangan terlebih dahulu. Tindakan ini menghapus seluruh riwayat gaji LOCKED, kasbon, pinjaman, dan pengaturan upah lama dari Firebase, tetapi tidak menghapus akun, PIN, atau pengaturan jam kerja.</p>
+  <button class="btn red" style="width:100%" onclick="clearDemoFinance()">Hapus Riwayat Keuangan Demo (Owner)</button>
+</div></section><section class="card" id="exportSection"><h3>Export Data</h3>
 <p class="note">Admin dapat export Absensi. Owner dapat export seluruh data termasuk Gaji, Pembayaran Locked, Kasbon, Pinjaman, dan Master Karyawan.</p>
 <div class="actions"><button class="btn soft" onclick="exportAttendanceCSV()">Export Absensi</button><button class="btn ownerOnly" onclick="exportOwnerWorkbook()">Export Semua Data</button></div>
 </section><section class="card" id="settingsSection"><h3>Pengaturan Jam Kerja</h3><p class="note">PIN hanya dapat dibuat dan diganti oleh Owner. Admin harus memasukkan PIN untuk mengubah jadwal.</p><button id="ownerPinBtn" class="btn soft ownerOnly" style="width:100%;margin-bottom:8px" onclick="changePin()">🔑 Atur / Ganti PIN (Owner)</button><button class="btn dark" style="width:100%" onclick="openPin('settings')">🔒 Buka Pengaturan</button><div id="settings" class="hidden"><label>Jam masuk normal</label><input type="time" id="workTime" value="08:00" onchange="saveSettings()"><div class="switch"><div><b>Absen Pulang</b><br><small class="muted">Opsional ON/OFF</small></div><input style="width:auto" type="checkbox" id="checkoutToggle" onchange="saveSettings()"></div><label>Jam pulang normal</label><input type="time" id="checkoutTime" value="17:00" onchange="saveSettings()"><div class="switch"><div><b>Verifikasi wajah setelah QR</b><br><small class="muted">Opsional</small></div><input style="width:auto" type="checkbox" id="faceToggle" onchange="saveSettings()"></div><button class="btn" style="width:100%;margin:8px 0 12px" onclick="saveSettings(true)">💾 Simpan Pengaturan</button></div></section>
@@ -67,7 +72,7 @@ async function syncEmployeesToFirestore(){try{for(const e of employees){await fi
 async function loadEmployeesFromFirestore(){
   try{
     const snap=await firestoreDb.collection('employees').get();
-    if(!snap.empty){
+    {
       employees=snap.docs.map(doc=>{
         const d=doc.data()||{};
         return {id:d.id||doc.id,name:d.name||'Tanpa Nama',job:d.job||'Karyawan',photo:d.photo||''};
@@ -190,6 +195,43 @@ async function resetDemo(){
     render();alert('Karyawan dan absensi demo berhasil dihapus. Data keuangan tetap tersimpan.');
   }catch(err){console.error('Reset demo gagal:',err);alert('Reset belum selesai: '+err.message+'\nPeriksa koneksi lalu coba lagi.');await Promise.all([loadEmployeesFromFirestore(),loadLogsFromFirestore()]);}
 }
+// Reset khusus keuangan demo. Tidak dijalankan otomatis; wajib Owner dan konfirmasi berlapis.
+async function clearDemoFinance(){
+  if(currentRole!=='OWNER' || !firebaseAuth.currentUser)
+    return alert('Hanya Owner yang dapat menghapus riwayat keuangan demo.');
+  if(!ownerFinanceSyncReady)
+    return alert('Data keuangan belum selesai dimuat dari Firebase. Muat ulang lalu coba lagi.');
+  const ref=firestoreDb.collection('ownerData').doc('payrollFinance');
+  try{
+    const snap=await ref.get({source:'server'});
+    if(!snap.exists) return alert('Tidak ada data keuangan Firebase yang perlu dihapus.');
+    const data=snap.data()||{};
+    const count=Array.isArray(data.finance)?data.finance.length:0;
+    const wages=data.payroll&&typeof data.payroll==='object'?Object.keys(data.payroll).length:0;
+    if(!count&&!wages) return alert('Riwayat keuangan sudah kosong.');
+    if(!confirm('PERHATIAN: akan menghapus '+count+' transaksi keuangan dan pengaturan upah '+wages+' karyawan dari Firebase. Data ini TIDAK dapat dipulihkan tanpa cadangan. Lanjut?'))return;
+    if(!confirm('Sudah mengunduh dan memeriksa file Export Semua Data sebagai cadangan? Pilih Cancel jika belum.'))return;
+    if(prompt('Ketik HAPUS KEUANGAN DEMO untuk mengonfirmasi:')!=='HAPUS KEUANGAN DEMO')return;
+    // Baca ulang dan batalkan jika ada perubahan dari perangkat lain.
+    await firestoreDb.runTransaction(async tx=>{
+      const latest=await tx.get(ref);
+      if(!latest.exists) throw Error('Dokumen keuangan sudah tidak tersedia.');
+      const d=latest.data()||{};
+      const latestCount=Array.isArray(d.finance)?d.finance.length:0;
+      const latestWages=d.payroll&&typeof d.payroll==='object'?Object.keys(d.payroll).length:0;
+      if(latestCount!==count||latestWages!==wages)
+        throw Error('Data keuangan berubah sejak konfirmasi. Periksa kembali sebelum menghapus.');
+      tx.update(ref,{finance:[],payroll:{},updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    });
+    payroll={};finance=[];render();
+    alert('Riwayat keuangan demo dan pengaturan upah berhasil dikosongkan dari Firebase.');
+  }catch(err){
+    console.error('Hapus keuangan demo gagal:',err);
+    alert('Data belum berhasil dikosongkan: '+err.message);
+    await loadOwnerFinanceFromFirestore();
+  }
+}
+
 let currentRole=null;
 let mfaResolver=null,mfaLoginVerificationId=null,mfaEnrollVerificationId=null;
 let mfaLoginRecaptcha=null,mfaEnrollRecaptcha=null;
